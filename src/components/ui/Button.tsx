@@ -20,11 +20,11 @@ interface ButtonProps {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-gradient-to-r from-pjazza-gold to-pjazza-honey text-white shadow-lg hover:opacity-90",
-  live: "bg-live text-white animate-live-pulse hover:opacity-90",
-  success: "bg-trust text-white hover:opacity-90",
+    "bg-ink text-white hover:opacity-90 active:opacity-95 shadow-card",
+  live: "bg-live text-white animate-live-pulse hover:opacity-90 active:opacity-95",
+  success: "bg-trust text-white hover:opacity-90 active:opacity-95",
   ghost:
-    "bg-transparent border border-line text-ink hover:bg-surface-alt",
+    "bg-transparent border border-line text-ink hover:bg-surface-alt active:bg-surface-alt",
 };
 
 export function Button({
@@ -38,7 +38,7 @@ export function Button({
   href,
 }: ButtonProps) {
   const base =
-    "py-3 rounded-xl font-extrabold text-sm inline-flex items-center justify-center gap-2 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed";
+    "py-3.5 rounded-apple font-semibold text-[15px] inline-flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variantClass = variantClasses[variant];
   const widthClass = fullWidth ? "w-full" : "";

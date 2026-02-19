@@ -17,14 +17,14 @@ export function Card({
   onClick,
 }: CardProps) {
   const base =
-    "bg-surface-card border border-line rounded-xl p-3 transition-colors";
+    "bg-white rounded-apple p-4 shadow-card transition-all duration-200";
 
   if (onClick) {
     return (
       <button
         type="button"
         onClick={onClick}
-        className={`${base} text-left w-full hover:bg-surface-alt cursor-pointer ${className}`}
+        className={`${base} text-left w-full hover:shadow-card-hover active:scale-[0.99] cursor-pointer ${className}`}
       >
         {children}
       </button>

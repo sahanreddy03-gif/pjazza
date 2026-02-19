@@ -61,15 +61,14 @@ export default async function BizPage({
     Object.values(business.vibe).some(Boolean);
 
   return (
-    <div className="space-y-6 pb-8">
-      {/* Header: name, locality, address, price tier, avg price */}
+    <div className="space-y-5 pb-8">
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-ink">
+            <h1 className="text-[22px] font-semibold tracking-tight text-ink">
               {business.name}
             </h1>
-            <p className="text-xs text-ink-muted mt-0.5">
+            <p className="text-[13px] text-ink-muted mt-0.5">
               {business.locality}
               {business.address && ` · ${business.address}`}
             </p>
@@ -80,22 +79,22 @@ export default async function BizPage({
         </div>
         <div className="flex flex-wrap gap-2">
           {business.price_tier && (
-            <Badge bg="bg-surface-alt" color="text-ink">
+            <Badge bg="bg-surface-alt" color="text-ink" className="border-0">
               {business.price_tier}
             </Badge>
           )}
           {business.avg_price && (
-            <Badge bg="bg-surface-alt" color="text-ink">
+            <Badge bg="bg-surface-alt" color="text-ink" className="border-0">
               {business.avg_price}
             </Badge>
           )}
           {business.verified && (
-            <Badge bg="bg-trust" color="text-white">
+            <Badge bg="bg-trust" color="text-white" className="border-0">
               ✓ Verified
             </Badge>
           )}
           {business.is_live && (
-            <Badge bg="bg-live" color="text-white">
+            <Badge bg="bg-live/90" color="text-white" className="border-0">
               <LivePulse className="scale-75" />
               LIVE · {business.live_viewer_count} watching
             </Badge>
@@ -103,16 +102,15 @@ export default async function BizPage({
         </div>
       </div>
 
-      {/* Trust Score */}
       <Card>
-        <h2 className="text-sm font-bold text-ink mb-2">Trust Score</h2>
+        <h2 className="text-[15px] font-semibold text-ink mb-3">Trust Score</h2>
         <TrustScore data={trustScore} />
       </Card>
 
       {/* Vibe */}
       {hasVibe && business.vibe && (
         <Card>
-          <h2 className="text-sm font-bold text-ink mb-2">Vibe</h2>
+          <h2 className="text-[15px] font-semibold text-ink mb-3">Vibe</h2>
           <div className="flex flex-wrap gap-2 text-xs text-ink-secondary">
             {business.vibe.music && (
               <span>🎵 {business.vibe.music}</span>
@@ -132,7 +130,7 @@ export default async function BizPage({
 
       {/* Crowd */}
       <Card>
-        <h2 className="text-sm font-bold text-ink mb-2">Crowd Level</h2>
+        <h2 className="text-[15px] font-semibold text-ink mb-3">Crowd Level</h2>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-ink-muted">
@@ -159,7 +157,7 @@ export default async function BizPage({
       {business.tags && business.tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {business.tags.map((tag) => (
-            <Badge key={tag} bg="bg-line" color="text-ink-muted">
+            <Badge key={tag} bg="bg-surface-alt" color="text-ink-secondary" className="border-0">
               {tag}
             </Badge>
           ))}

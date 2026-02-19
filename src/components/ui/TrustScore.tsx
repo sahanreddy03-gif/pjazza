@@ -25,10 +25,10 @@ export function TrustScore({ data, className = "" }: TrustScoreProps) {
   }
 
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div className={`space-y-3 ${className}`}>
       <div className="flex items-baseline gap-2">
-        <span className="text-lg font-extrabold text-ink">{score.toFixed(1)}</span>
-        <span className="text-xs text-ink-muted">
+        <span className="text-[28px] font-semibold text-ink">{score.toFixed(1)}</span>
+        <span className="text-[13px] text-ink-muted">
           {totalReviews} review{totalReviews !== 1 ? "s" : ""}
         </span>
       </div>
@@ -43,15 +43,15 @@ export function TrustScore({ data, className = "" }: TrustScoreProps) {
           return (
             <div
               key={source.name}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-surface-alt border border-line-light"
+              className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-apple bg-surface-alt"
             >
               <span
                 className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`}
               />
-              <span className="text-[10px] font-semibold text-ink">
+              <span className="text-[11px] font-medium text-ink">
                 {source.name}
               </span>
-              <span className="text-[10px] text-ink-muted">
+              <span className="text-[11px] text-ink-muted">
                 {source.rating.toFixed(1)} ({source.count})
               </span>
             </div>

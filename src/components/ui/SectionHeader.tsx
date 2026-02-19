@@ -20,17 +20,17 @@ export function SectionHeader({
   return (
     <div className={`flex items-start justify-between gap-3 ${className}`}>
       <div>
-        <h2 className="text-base font-extrabold tracking-tight text-ink">
+        <h2 className="text-[17px] font-semibold tracking-tight text-ink">
           {title}
         </h2>
         {subtitle && (
-          <p className="text-xs text-ink-muted mt-0.5">{subtitle}</p>
+          <p className="text-[13px] text-ink-muted mt-0.5">{subtitle}</p>
         )}
       </div>
       {actionLabel && actionHref && (
         <a
           href={actionHref}
-          className="text-xs font-semibold text-pjazza-gold hover:underline shrink-0"
+          className="text-[13px] font-medium text-info hover:opacity-80 shrink-0 transition-opacity"
         >
           {actionLabel}
         </a>

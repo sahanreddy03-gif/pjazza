@@ -1,12 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans } from "next/font/google";
 import "./globals.css";
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-dm-sans",
-});
 
 export const metadata: Metadata = {
   title: "PJAZZA",
@@ -23,7 +16,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#FAF7F2",
+  themeColor: "#f5f5f7",
 };
 
 export default function RootLayout({
@@ -32,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={dmSans.variable}>
+    <html lang="en">
       <body className="min-h-screen bg-surface text-ink antialiased font-sans">
         <div className="min-h-screen max-w-[420px] mx-auto bg-surface">
           {children}

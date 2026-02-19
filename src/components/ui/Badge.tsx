@@ -17,12 +17,12 @@ interface BadgeProps {
 export function Badge({
   children,
   className = "",
-  bg = "bg-line",
+  bg = "bg-surface-alt",
   color = "text-ink",
 }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${bg} ${color} ${className}`}
+      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium ${bg} ${color} ${className}`}
     >
       {children}
     </span>
