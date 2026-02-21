@@ -9,8 +9,7 @@ import {
   ChefHat, Dumbbell, Music, Globe, MapPin, Clock,
   ChevronRight, Users, Shield, Calendar, Play
 } from 'lucide-react';
-import TopBar from '@/components/TopBar';
-import BottomNav from '@/components/BottomNav';
+import PjAppShell from '@/components/PjAppShell';
 import ScrollReveal from '@/components/ScrollReveal';
 
 const imgElectrician = '/pjazza/images/people/electrician.jpg';
@@ -298,8 +297,8 @@ export default function People() {
   const liveCount = filtered.filter(p => p.liveNow).length;
 
   return (
+    <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
-      <TopBar />
       <PageHero />
       <SearchBar value={searchQuery} onChange={setSearchQuery} />
       <CategoryFilters active={activeCategory} onChange={setActiveCategory} />
@@ -341,7 +340,7 @@ export default function People() {
       <div className="pj-divider" />
       <BottomCTA />
       <div style={{ height: 32 }} />
-      <BottomNav />
     </div>
+    </PjAppShell>
   );
 }

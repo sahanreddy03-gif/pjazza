@@ -7,8 +7,7 @@ import {
   Compass, Users, Eye, Star, CheckCircle, ChevronRight,
   Radio, Shield
 } from 'lucide-react';
-import TopBar from '@/components/TopBar';
-import BottomNav from '@/components/BottomNav';
+import PjAppShell from '@/components/PjAppShell';
 import ScrollReveal from '@/components/ScrollReveal';
 import BrandMarquee from '@/components/BrandMarquee';
 
@@ -353,8 +352,8 @@ function BottomCTA() {
 
 export default function Sectors() {
   return (
+    <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
-      <TopBar />
       <PageHero />
       <QuickNav />
       <div className="pj-divider" />
@@ -364,7 +363,7 @@ export default function Sectors() {
       <div className="pj-divider" />
       <BottomCTA />
       <div style={{ height: 32 }} />
-      <BottomNav />
     </div>
+    </PjAppShell>
   );
 }

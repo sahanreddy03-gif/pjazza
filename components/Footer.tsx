@@ -16,9 +16,11 @@ export default function Footer() {
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span className="pj-display" style={{ fontSize: 'var(--pj-size-h3)', fontWeight: 800, color: 'var(--pj-text)', letterSpacing: '-0.02em' }}>
-            PJAZZA
-          </span>
+          <img
+            src="/pjazza/images/logo-white.svg"
+            alt="PJAZZA"
+            style={{ height: 24, width: 'auto', display: 'block' }}
+          />
           <span style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-text-tertiary)' }}>by Maltaverse</span>
           <span
             style={{

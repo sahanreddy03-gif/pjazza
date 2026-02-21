@@ -55,17 +55,11 @@ export default function TopBar() {
             }}
             data-testid="button-logo"
           >
-            <span
-              className="pj-display"
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                letterSpacing: '-0.02em',
-                color: 'var(--pj-text)',
-              }}
-            >
-              PJAZZA
-            </span>
+            <img
+              src="/pjazza/images/logo-white.svg"
+              alt="PJAZZA"
+              style={{ height: 22, width: 'auto', display: 'block' }}
+            />
             <span className="pj-live-dot" />
           </button>
 

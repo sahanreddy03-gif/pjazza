@@ -105,6 +105,9 @@ export type StreamForList = {
   rating: number;
   businessId?: string;
   slug?: string; // store slug for linking to live-shop
+  videoUrl?: string | null; // replay video URL
+  roomId?: string | null; // LiveKit room for live streams
+  isLive: boolean;
 };
 
 function businessToStore(b: BusinessRow & { google_review_count?: number | null; tripadvisor_review_count?: number | null; google_rating?: number | null; vibe_summary?: string | null; logo_url?: string | null }, index: number): StoreForList {
@@ -191,6 +194,7 @@ function streamToForList(
   business?: { id?: string; name: string; locality: string; industry: string; cover_image_url: string | null; slug?: string }
 ): StreamForList {
   const sector = business?.industry || "retail";
+  const bizId = s.business_id ?? business?.id;
   return {
     name: business?.name || s.title || "Live Stream",
     location: business?.locality || "Malta",
@@ -198,8 +202,11 @@ function streamToForList(
     category: SECTOR_LABELS[sector] || sector,
     img: s.thumbnail_url || business?.cover_image_url || SECTOR_IMAGES[sector] || "/pjazza/images/thumb-food.jpg",
     rating: 4.7,
-    businessId: s.business_id ?? undefined,
+    businessId: bizId ?? undefined,
     slug: business?.slug,
+    videoUrl: s.video_url,
+    roomId: s.room_id ?? (bizId ? `store-${bizId}` : null),
+    isLive: s.is_live ?? false,
   };
 }
 
@@ -328,12 +335,48 @@ export async function getStreams(): Promise<StreamForList[]> {
         rating: 4.7,
         businessId: b.id,
         slug: b.slug,
+        videoUrl: null,
+        roomId: `store-${b.id}`,
+        isLive: true,
       }));
     }
   } catch {
     // Fall through to mock
   }
   return getMockStreams();
+}
+
+/** Fetches live streams + replays (streams with video_url) for consumer Live feed */
+export async function getStreamsWithReplays(): Promise<StreamForList[]> {
+  try {
+    const supabase = await createClient();
+    const { data: liveStreams } = await supabase
+      .from("streams")
+      .select("*")
+      .eq("is_live", true)
+      .order("peak_viewers", { ascending: false })
+      .limit(6);
+    const { data: replays } = await supabase
+      .from("streams")
+      .select("*")
+      .not("video_url", "is", null)
+      .eq("is_live", false)
+      .order("created_at", { ascending: false })
+      .limit(6);
+    const all = [...(liveStreams || []), ...(replays || []).filter((r) => !liveStreams?.some((l) => l.id === r.id))];
+    if (all.length > 0) {
+      const bizIds = [...new Set(all.map((s) => s.business_id).filter(Boolean))] as string[];
+      const { data: businesses } = bizIds.length > 0
+        ? await supabase.from("businesses").select("id, name, locality, industry, cover_image_url, slug").in("id", bizIds)
+        : { data: [] };
+      const bizMap = new Map((businesses || []).map((b: { id: string; name: string; locality: string; industry: string; cover_image_url: string | null; slug?: string }) => [b.id, b]));
+      return (all as StreamRow[]).map((s) => streamToForList(s, s.business_id ? bizMap.get(s.business_id) : undefined));
+    }
+  } catch {
+    //
+  }
+  const streams = await getStreams();
+  return streams.length > 0 ? streams : getMockStreams();
 }
 
 export async function getLiveBusinessCount(): Promise<number> {
@@ -348,6 +391,19 @@ export async function getLiveBusinessCount(): Promise<number> {
     //
   }
   return 8; // mock default
+}
+
+export async function getBusinessCount(): Promise<number> {
+  try {
+    const supabase = await createClient();
+    const { count, error } = await supabase
+      .from("businesses")
+      .select("*", { count: "exact", head: true });
+    if (!error && count != null) return count;
+  } catch {
+    //
+  }
+  return 24; // mock fallback
 }
 
 // ─── Mock fallbacks (when Supabase has no data) ──────────────────────────────
@@ -566,11 +622,13 @@ function getMockStoreBySlug(slug: string): StoreWithProducts | null {
 }
 
 function getMockStreams(): StreamForList[] {
+  const mockBizIds = ["fod-001", "yht-001", "prp-001", "car-001", "spa-001"];
+  const mockSlugs = ["nonis-kitchen", "grand-harbour-charters", "island-properties", "malta-motors", "fortina-wellness"];
   return [
-    { name: "Noni's Kitchen", location: "Sliema", viewers: 47, category: "Restaurant", img: "/pjazza/images/thumb-food.jpg", rating: 4.8 },
-    { name: "Blue Harbour Charters", location: "Grand Harbour", viewers: 23, category: "Yacht Charter", img: "/pjazza/images/thumb-yacht.jpg", rating: 4.9 },
-    { name: "Seaview Residence", location: "St Julian's", viewers: 18, category: "Real Estate", img: "/pjazza/images/thumb-property.jpg", rating: 4.7 },
-    { name: "Malta Motors", location: "Birkirkara", viewers: 31, category: "Automotive", img: "/pjazza/images/thumb-car.jpg", rating: 4.6 },
-    { name: "Fortina Spa", location: "Sliema", viewers: 15, category: "Wellness", img: "/pjazza/images/thumb-wellness.jpg", rating: 4.8 },
+    { name: "Noni's Kitchen", location: "Sliema", viewers: 47, category: "Restaurant", img: "/pjazza/images/thumb-food.jpg", rating: 4.8, businessId: mockBizIds[0], slug: mockSlugs[0], isLive: true, roomId: `store-${mockBizIds[0]}`, videoUrl: null },
+    { name: "Blue Harbour Charters", location: "Grand Harbour", viewers: 23, category: "Yacht Charter", img: "/pjazza/images/thumb-yacht.jpg", rating: 4.9, businessId: mockBizIds[1], slug: mockSlugs[1], isLive: true, roomId: `store-${mockBizIds[1]}`, videoUrl: null },
+    { name: "Seaview Residence", location: "St Julian's", viewers: 18, category: "Real Estate", img: "/pjazza/images/thumb-property.jpg", rating: 4.7, businessId: mockBizIds[2], slug: mockSlugs[2], isLive: true, roomId: `store-${mockBizIds[2]}`, videoUrl: null },
+    { name: "Malta Motors", location: "Birkirkara", viewers: 31, category: "Automotive", img: "/pjazza/images/thumb-car.jpg", rating: 4.6, businessId: mockBizIds[3], slug: mockSlugs[3], isLive: false, roomId: null, videoUrl: null },
+    { name: "Fortina Spa", location: "Sliema", viewers: 15, category: "Wellness", img: "/pjazza/images/thumb-wellness.jpg", rating: 4.8, businessId: mockBizIds[4], slug: mockSlugs[4], isLive: false, roomId: null, videoUrl: null },
   ];
 }

@@ -7,8 +7,7 @@ import {
   ChevronRight, Users, CheckCircle, Calendar,
   Radio
 } from 'lucide-react';
-import TopBar from '@/components/TopBar';
-import BottomNav from '@/components/BottomNav';
+import PjAppShell from '@/components/PjAppShell';
 import ScrollReveal from '@/components/ScrollReveal';
 
 function QuickStats() {
@@ -279,8 +278,8 @@ function UpcomingStreams() {
 export default function BusinessDashboard() {
   const router = useRouter();
   return (
+    <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
-      <TopBar />
 
       <div className="pj-section" style={{ paddingTop: 20, paddingBottom: 0 }}>
         <ScrollReveal>
@@ -340,7 +339,7 @@ export default function BusinessDashboard() {
       </div>
 
       <div style={{ height: 32 }} />
-      <BottomNav />
     </div>
+    </PjAppShell>
   );
 }

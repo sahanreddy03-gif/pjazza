@@ -24,7 +24,7 @@ const imgLawyer = '/pjazza/images/people/lawyer.jpg';
 const imgChef = '/pjazza/images/people/chef.jpg';
 const imgHairstylist = '/pjazza/images/people/hairstylist.jpg';
 
-function Hero({ liveCount }: { liveCount: number }) {
+function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?: number }) {
   const router = useRouter();
 
   return (
@@ -62,11 +62,18 @@ function Hero({ liveCount }: { liveCount: number }) {
               lineHeight: 1.5,
               color: 'var(--pj-text-secondary)',
               maxWidth: 440,
-              marginBottom: 36,
+              marginBottom: 16,
             }}
           >
-            Malta's live shopping marketplace. See every product, service, and property in real time before you buy.
+            Malta&apos;s live shopping marketplace. See every product, service, and property in real time before you buy.
           </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 36, fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>
+            <span><strong className="pj-mono" style={{ color: 'var(--pj-text)' }}>{businessCount ?? 60}+</strong> businesses</span>
+            <span>·</span>
+            <span><strong className="pj-mono" style={{ color: 'var(--pj-text)' }}>12</strong> sectors</span>
+            <span>·</span>
+            <span>Escrow protected</span>
+          </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, maxWidth: 440 }}>
             <button
               className="pj-btn-primary"
@@ -344,16 +351,16 @@ function HowItWorksPreview() {
   );
 }
 
-function StatsBar() {
+function StatsBar({ businessCount = 60 }: { businessCount?: number }) {
   return (
     <ScrollReveal>
       <div className="pj-section-tight" style={{ paddingTop: 0, paddingBottom: 0 }}>
         <div className="pj-stats-grid" style={{ gap: 1 }}>
           {[
             { value: '2,400+', label: 'watching now' },
-            { value: '180+', label: 'businesses' },
+            { value: `${businessCount}+`, label: 'businesses' },
             { value: '12', label: 'sectors' },
-            { value: 'Same-day', label: 'delivery' },
+            { value: 'Escrow', label: 'protected' },
           ].map((stat, i) => (
             <div
               key={i}
@@ -454,7 +461,7 @@ function PeoplePreview() {
   );
 }
 
-function FinalCTA() {
+function FinalCTA({ businessCount = 60 }: { businessCount?: number }) {
   const router = useRouter();
 
   return (
@@ -466,7 +473,7 @@ function FinalCTA() {
           <span style={{ color: 'var(--pj-gold)' }}>Live.</span>
         </h2>
         <p style={{ fontSize: 'var(--pj-size-body)', color: 'var(--pj-text-tertiary)', marginBottom: 32, lineHeight: 1.6, maxWidth: 380, margin: '0 auto 32px' }}>
-          12 sectors. 180+ businesses. 200+ individuals.
+        12 sectors. {businessCount}+ businesses. One marketplace.
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', maxWidth: 440, margin: '0 auto' }}>
           <button
@@ -513,11 +520,11 @@ function TrustLine() {
   );
 }
 
-export default function LandingClient({ initialStreams, liveCount }: { initialStreams: StreamForList[]; liveCount: number }) {
+export default function LandingClient({ initialStreams, liveCount, businessCount = 60 }: { initialStreams: StreamForList[]; liveCount: number; businessCount?: number }) {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
-      <Hero liveCount={liveCount} />
-      <StatsBar />
+      <Hero liveCount={liveCount} businessCount={businessCount} />
+      <StatsBar businessCount={businessCount} />
       <TrustLine />
       <LiveNowPreview streams={initialStreams} />
       <div className="pj-divider" />
@@ -529,7 +536,7 @@ export default function LandingClient({ initialStreams, liveCount }: { initialSt
       <div className="pj-divider" />
       <HowItWorksPreview />
       <div className="pj-divider" />
-      <FinalCTA />
+      <FinalCTA businessCount={businessCount} />
       <div style={{ height: 48 }} />
     </div>
   );

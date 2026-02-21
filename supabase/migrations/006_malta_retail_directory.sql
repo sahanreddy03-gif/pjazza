@@ -1,6 +1,36 @@
 -- PJAZZA Malta Retail Directory — 50+ real Malta businesses
 -- Pre-populated for "claim your listing" flow. owner_id NULL = unclaimed.
--- Run after 005_seed_rich_data.sql
+-- Self-contained: adds missing columns if migrations 004/005 were skipped.
+
+-- Ensure businesses has required columns
+ALTER TABLE public.businesses
+  ADD COLUMN IF NOT EXISTS logo_url TEXT,
+  ADD COLUMN IF NOT EXISTS image_urls TEXT[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS google_review_count INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS google_rating DECIMAL(2,1) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS tripadvisor_review_count INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS tripadvisor_rating DECIMAL(2,1) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS address_full TEXT,
+  ADD COLUMN IF NOT EXISTS phone TEXT,
+  ADD COLUMN IF NOT EXISTS website_url TEXT,
+  ADD COLUMN IF NOT EXISTS opening_hours TEXT,
+  ADD COLUMN IF NOT EXISTS vibe_summary TEXT;
+
+-- Ensure business_reviews exists
+CREATE TABLE IF NOT EXISTS public.business_reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
+  platform TEXT NOT NULL CHECK (platform IN ('google', 'tripadvisor', 'other')),
+  rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  review_text TEXT NOT NULL,
+  author_name TEXT,
+  is_positive BOOLEAN NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_business_reviews_business ON public.business_reviews(business_id);
+ALTER TABLE public.business_reviews ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read business_reviews" ON public.business_reviews;
+CREATE POLICY "Public read business_reviews" ON public.business_reviews FOR SELECT USING (true);
 
 -- Real Malta retail & notable businesses (names from public sources)
 INSERT INTO public.businesses (id, name, slug, industry, description, locality, verified, is_live, live_viewer_count, cover_image_url, image_urls, google_review_count, google_rating, tripadvisor_review_count, tripadvisor_rating, address_full, phone, website_url, vibe_summary) VALUES
@@ -56,7 +86,8 @@ INSERT INTO public.businesses (id, name, slug, industry, description, locality, 
 ('a1b2c3d4-0057-4000-8000-000000000057', 'Lush Malta', 'lush-malta', 'beauty', 'Fresh handmade cosmetics. The Point.', 'Sliema', false, false, 0, '/pjazza/images/stores/hair-salon.jpg', ARRAY['/pjazza/images/stores/hair-salon.jpg'], 445, 4.6, 312, 4.5, 'The Point Mall, Sliema, Malta', NULL, NULL, 'Bath bombs, skincare. Ethical. Staff demo products.'),
 ('a1b2c3d4-0058-4000-8000-000000000058', 'Next Malta', 'next-malta', 'fashion', 'Fashion and home. The Point.', 'Sliema', false, false, 0, '/pjazza/images/stores/fashion-boutique.jpg', ARRAY['/pjazza/images/stores/fashion-boutique.jpg'], 534, 4.2, 367, 4.1, 'The Point Mall, Sliema, Malta', NULL, NULL, 'British high street. Kids, home, fashion. One-stop.'),
 ('a1b2c3d4-0059-4000-8000-000000000059', 'Electronics Centre Malta', 'electronics-centre', 'electronics', 'TVs, appliances, gadgets. Multiple locations.', 'Birkirkara', false, false, 0, '/pjazza/images/stores/electronics-store.jpg', ARRAY['/pjazza/images/stores/electronics-store.jpg'], 312, 4.3, 198, 4.2, 'Notabile Road, Birkirkara, Malta', NULL, NULL, 'Good for white goods. Delivery. Decent prices.'),
-('a1b2c3d4-0060-4000-8000-000000000060', 'Smart Supermarket', 'smart-supermarket', 'food', 'Supermarket with bakery, deli. Local chain.', 'Mosta', false, false, 0, '/pjazza/images/stores/restaurant.jpg', ARRAY['/pjazza/images/stores/restaurant.jpg'], 445, 4.1, 267, 4.0, 'Main Street, Mosta, Malta', NULL, NULL, 'Local favourite. Good fresh section. Parking ok.');
+('a1b2c3d4-0060-4000-8000-000000000060', 'Smart Supermarket', 'smart-supermarket', 'food', 'Supermarket with bakery, deli. Local chain.', 'Mosta', false, false, 0, '/pjazza/images/stores/restaurant.jpg', ARRAY['/pjazza/images/stores/restaurant.jpg'], 445, 4.1, 267, 4.0, 'Main Street, Mosta, Malta', NULL, NULL, 'Local favourite. Good fresh section. Parking ok.')
+ON CONFLICT (id) DO NOTHING;
 
 -- Curated reviews for new retail (2 best, 2 worst) - sample for top 10 new
 INSERT INTO public.business_reviews (business_id, platform, rating, review_text, author_name, is_positive) VALUES

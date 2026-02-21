@@ -8,8 +8,7 @@ import {
   ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useState } from 'react';
-import TopBar from '@/components/TopBar';
-import BottomNav from '@/components/BottomNav';
+import PjAppShell from '@/components/PjAppShell';
 import ScrollReveal from '@/components/ScrollReveal';
 
 function PageHero() {
@@ -361,8 +360,8 @@ function BottomCTA() {
 
 export default function HowItWorks() {
   return (
+    <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
-      <TopBar />
       <PageHero />
       <div className="pj-divider" />
       <BuyerFlow />
@@ -375,7 +374,7 @@ export default function HowItWorks() {
       <div className="pj-divider" />
       <BottomCTA />
       <div style={{ height: 32 }} />
-      <BottomNav />
     </div>
+    </PjAppShell>
   );
 }

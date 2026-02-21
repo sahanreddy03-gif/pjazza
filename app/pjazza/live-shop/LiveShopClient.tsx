@@ -8,8 +8,7 @@ import {
   ShoppingBag, GraduationCap, PawPrint, Compass, MapPin,
   Eye, Clock, Package, Grid3X3, Zap, Scissors
 } from 'lucide-react';
-import TopBar from '@/components/TopBar';
-import BottomNav from '@/components/BottomNav';
+import PjAppShell from '@/components/PjAppShell';
 import ScrollReveal from '@/components/ScrollReveal';
 import type { StoreForList } from '@/src/lib/data';
 
@@ -335,8 +334,8 @@ export default function LiveShopClient({ initialStores }: { initialStores: Store
   const liveFirst = [...filtered].sort((a, b) => (b.liveNow ? 1 : 0) - (a.liveNow ? 1 : 0));
 
   return (
+    <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
-      <TopBar />
       <PageHero liveCount={liveCount} />
       <HowItWorksBanner />
       <SearchBar value={searchQuery} onChange={setSearchQuery} />
@@ -380,7 +379,7 @@ export default function LiveShopClient({ initialStores }: { initialStores: Store
       <div className="pj-divider" />
       <BottomCTA />
       <div style={{ height: 32 }} />
-      <BottomNav />
     </div>
+    </PjAppShell>
   );
 }

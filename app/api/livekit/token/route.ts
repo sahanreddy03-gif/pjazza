@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { room, identity, name } = body as { room?: string; identity?: string; name?: string };
+    const { room, identity, name, subscribeOnly } = body as { room?: string; identity?: string; name?: string; subscribeOnly?: boolean };
 
     if (!room || !identity) {
       return NextResponse.json(
@@ -32,9 +32,9 @@ export async function POST(req: NextRequest) {
     at.addGrant({
       roomJoin: true,
       room,
-      canPublish: true,
+      canPublish: !subscribeOnly,
       canSubscribe: true,
-      canPublishData: true,
+      canPublishData: !subscribeOnly,
     });
 
     const token = await at.toJwt();

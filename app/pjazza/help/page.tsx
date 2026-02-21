@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
-import TopBar from '@/components/TopBar';
-import BottomNav from '@/components/BottomNav';
+import PjAppShell from '@/components/PjAppShell';
 
 const faqs = [
   { q: 'How do I shop live?', a: 'Browse the Live Shop, pick a store, and tap "Shop Live". A salesperson will video-call you from the shop floor. You can see products in real time, ask questions, and add items to your cart.' },
@@ -22,8 +21,8 @@ export default function HelpPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
+    <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
-      <TopBar />
       <div className="pj-section" style={{ paddingTop: 60, paddingBottom: 100 }}>
         <button className="pj-btn-ghost" style={{ marginBottom: 24, gap: 6 }} onClick={() => router.back()}>
           <ArrowLeft size={16} /> Back
@@ -65,7 +64,7 @@ export default function HelpPage() {
           <a href="mailto:support@pjazza.com" style={{ fontSize: 'var(--pj-size-small)', fontWeight: 600, color: 'var(--pj-red)', textDecoration: 'none' }}>support@pjazza.com</a>
         </div>
       </div>
-      <BottomNav />
     </div>
+    </PjAppShell>
   );
 }

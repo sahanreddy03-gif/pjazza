@@ -7,8 +7,7 @@ import {
   TrendingUp, Clock, Users, Flame, Smartphone, GraduationCap,
   PawPrint, Compass, Info, Grid3X3
 } from 'lucide-react';
-import TopBar from '@/components/TopBar';
-import BottomNav from '@/components/BottomNav';
+import PjAppShell from '@/components/PjAppShell';
 import ScrollReveal from '@/components/ScrollReveal';
 import BrandMarquee from '@/components/BrandMarquee';
 import type { StreamForList } from '@/src/lib/data';
@@ -385,8 +384,8 @@ function CrowdIntelligence() {
 
 export default function DiscoverClient({ initialStreams, liveCount }: { initialStreams: StreamForList[]; liveCount: number }) {
   return (
+    <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
-      <TopBar />
       <HeroSection liveCount={liveCount} />
       <QuickLinks />
       <LiveNowSection streams={initialStreams} />
@@ -402,7 +401,7 @@ export default function DiscoverClient({ initialStreams, liveCount }: { initialS
       <div className="pj-divider" />
       <CrowdIntelligence />
       <div style={{ height: 32 }} />
-      <BottomNav />
     </div>
+    </PjAppShell>
   );
 }

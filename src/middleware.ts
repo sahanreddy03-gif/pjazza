@@ -1,12 +1,20 @@
 /**
  * Next.js middleware — Supabase auth session refresh
+ * Wrapped in try/catch so deployment works even if env vars are missing
  */
 
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/src/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  try {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return await updateSession(request);
+    }
+  } catch {
+    // Auth refresh failed — continue without session (avoids 500 on Vercel)
+  }
+  return NextResponse.next();
 }
 
 export const config = {

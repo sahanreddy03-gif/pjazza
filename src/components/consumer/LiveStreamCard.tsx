@@ -16,12 +16,23 @@ export function LiveStreamCard({ business }: LiveStreamCardProps) {
       ? business.pjazza_rating
       : business.google_rating ?? business.tripadvisor_rating ?? null;
 
+  const href = business.is_live && business.id
+    ? `/pjazza/live-shop/${business.slug || business.id}`
+    : `/biz/${business.slug}`;
+
   return (
     <Link
-      href={`/biz/${business.slug}`}
-      className="block w-[150px] shrink-0 rounded-apple bg-white overflow-hidden shadow-card transition-all duration-200 hover:shadow-card-hover active:scale-[0.99]"
+      href={href}
+      className="group block w-[150px] shrink-0 overflow-hidden rounded-apple bg-white shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover active:scale-[0.98]"
     >
-      <div className="relative h-[100px] bg-surface-alt">
+      <div className="relative h-[100px] overflow-hidden bg-surface-alt">
+        {business.cover_image_url ? (
+          <img
+            src={business.cover_image_url}
+            alt=""
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : null}
         {business.is_live && (
           <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-live px-2 py-0.5 text-[9px] font-medium text-white">
             <LivePulse className="scale-75" />

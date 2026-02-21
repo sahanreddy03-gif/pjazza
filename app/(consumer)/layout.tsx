@@ -25,13 +25,14 @@ export default function ConsumerLayout({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen flex flex-col w-full max-w-[420px] mx-auto bg-surface">
+    <div className="min-h-screen flex flex-col w-full max-w-[420px] md:max-w-2xl lg:max-w-4xl mx-auto bg-surface">
       <header className="sticky top-0 z-50 flex items-center justify-between gap-3 px-5 py-3 bg-white/80 backdrop-blur-xl border-b border-line/50">
-        <Link
-          href="/"
-          className="text-[17px] font-semibold tracking-tight text-ink"
-        >
-          PJAZZA
+        <Link href="/" className="flex items-center">
+          <img
+            src="/pjazza/images/logo-black.svg"
+            alt="PJAZZA"
+            className="h-6 w-auto"
+          />
         </Link>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-live/10 text-live">
@@ -60,7 +61,7 @@ export default function ConsumerLayout({
 
       <main className="flex-1 px-5 py-5 pb-28">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-[420px] mx-auto bg-white/80 backdrop-blur-xl border-t border-line/50">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-[420px] md:max-w-2xl lg:max-w-4xl mx-auto bg-white/80 backdrop-blur-xl border-t border-line/50">
         <div className="flex items-center justify-around py-2">
           {NAV_TABS.map((tab) => {
             const isActive = pathname.startsWith(tab.href);
