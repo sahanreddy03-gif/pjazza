@@ -1,14 +1,136 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ArrowRight, TrendingUp, Users, Eye, Shield, Clock,
-  Utensils, Home, Ship, Car, Heart, Wrench, CheckCircle,
-  Zap, DollarSign, Target, Star, ShoppingBag, Smartphone,
-  GraduationCap, PawPrint, Compass, MessageSquare
+  ArrowRight, Search, CheckCircle, MapPin, Star,
+  Utensils, Home, Ship, Car, Heart, Wrench,
+  Zap, DollarSign, Target, Eye, Shield, Clock,
+  Users, ShoppingBag, Smartphone, GraduationCap,
+  PawPrint, Compass, MessageSquare
 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 import BrandMarquee from '@/components/BrandMarquee';
+
+type BusinessSearchResult = {
+  id: string;
+  name: string;
+  slug: string;
+  industry?: string;
+  locality?: string;
+  cover_image_url?: string | null;
+  logo_url?: string | null;
+  image_urls?: string[] | null;
+  google_review_count?: number | null;
+  google_rating?: number | null;
+  tripadvisor_review_count?: number | null;
+  tripadvisor_rating?: number | null;
+  vibe_summary?: string | null;
+  address_full?: string | null;
+};
+
+const SECTOR_LABELS: Record<string, string> = {
+  food: 'Food & Dining', property: 'Property', cars: 'Cars & Auto',
+  yachts: 'Yachts', 'home-services': 'Home Services', wellness: 'Wellness',
+  fashion: 'Fashion', electronics: 'Electronics', tourism: 'Tourism',
+  education: 'Education', pets: 'Pets', beauty: 'Beauty',
+};
+
+function FindYourBusiness() {
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<BusinessSearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+
+  useEffect(() => {
+    if (!query || query.length < 2) {
+      setResults([]);
+      setSearched(false);
+      return;
+    }
+    const t = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/businesses?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        setResults(Array.isArray(data) ? data.slice(0, 8) : []);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+        setSearched(true);
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  return (
+    <div className="pj-section" style={{ paddingTop: 40, paddingBottom: 32 }}>
+      <ScrollReveal>
+        <span className="pj-label" style={{ display: 'block', marginBottom: 8 }}>ALREADY ON PJAZZA</span>
+        <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', marginBottom: 8, letterSpacing: '-0.01em' }}>
+          Is your business already listed?
+        </h2>
+        <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+          We&apos;ve pre-loaded 60+ Malta businesses with logos, reviews, and vibe. Claim yours in one click.
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderRadius: 'var(--pj-radius-md)', background: 'var(--pj-surface-1)', border: '1px solid var(--pj-border)', marginBottom: 16 }}>
+          <Search size={18} style={{ color: 'var(--pj-text-tertiary)' }} />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name, location, or sector..."
+            style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--pj-text)', fontSize: 'var(--pj-size-body)', fontFamily: 'inherit', outline: 'none' }}
+          />
+        </div>
+        {loading && <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-tertiary)' }}>Searching...</p>}
+        {searched && query.length >= 2 && !loading && results.length === 0 && (
+          <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>No match. List your business as new below.</p>
+        )}
+        {results.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {results.map((b) => (
+              <div
+                key={b.id}
+                className="pj-card pj-touch"
+                style={{ padding: 16, display: 'flex', gap: 14, alignItems: 'flex-start' }}
+                onClick={() => router.push(`/pjazza/live-shop/${b.slug}`)}
+              >
+                <div style={{ width: 72, height: 72, borderRadius: 12, overflow: 'hidden', flexShrink: 0, background: 'var(--pj-surface-2)' }}>
+                  <img src={b.cover_image_url || b.logo_url || '/pjazza/images/stores/fashion-boutique.jpg'} alt={b.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ fontSize: 'var(--pj-size-body)', fontWeight: 700, color: 'var(--pj-text)', marginBottom: 4 }}>{b.name}</h3>
+                  <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-tertiary)', marginBottom: 6 }}>
+                    {b.locality} · {SECTOR_LABELS[b.industry || ''] || b.industry}
+                  </p>
+                  {(b.google_review_count || b.tripadvisor_review_count) && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+                      {b.google_rating && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}><Star size={12} fill="#D4A574" style={{ color: '#D4A574' }} /> {b.google_rating}</span>}
+                      {b.google_review_count ? <span style={{ fontSize: 11, color: 'var(--pj-text-tertiary)' }}>{b.google_review_count} Google</span> : null}
+                      {b.tripadvisor_review_count ? <span style={{ fontSize: 11, color: 'var(--pj-text-tertiary)' }}>{b.tripadvisor_review_count} TripAdvisor</span> : null}
+                    </div>
+                  )}
+                  {b.vibe_summary && <p style={{ fontSize: 11, color: 'var(--pj-text-secondary)', lineHeight: 1.4, fontStyle: 'italic' }}>{b.vibe_summary.slice(0, 80)}{b.vibe_summary.length > 80 ? '…' : ''}</p>}
+                </div>
+                <button
+                  className="pj-btn-primary"
+                  style={{ padding: '10px 18px', fontSize: 13, flexShrink: 0 }}
+                  onClick={(e) => { e.stopPropagation(); router.push(`/pjazza/business/dashboard?claim=${b.id}`); }}
+                  data-testid={`button-claim-${b.slug}`}
+                >
+                  Claim
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </ScrollReveal>
+    </div>
+  );
+}
 
 function PitchHero() {
   const router = useRouter();
@@ -282,6 +404,8 @@ function FinalCTA() {
 export default function BusinessOnboard() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
+      <FindYourBusiness />
+      <div className="pj-divider" />
       <PitchHero />
       <div className="pj-divider" />
       <ProblemSection />

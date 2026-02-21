@@ -236,6 +236,12 @@ const SLUG_TO_ID: Record<string, string> = {
   "edu-001": "the-book-nook",
   "tou-001": "malta-souvenirs",
   "frank-salt": "frank-salt",
+  "bay-street": "bay-street-complex",
+  "plaza": "the-plaza-sliema",
+  "charles-ron": "charles-ron-valletta",
+  "soap-cafe": "soap-cafe-valletta",
+  "ta-qali": "ta-qali-crafts-village",
+  "scan": "scan-malta",
 };
 
 export async function getStoreBySlug(slugOrId: string): Promise<StoreWithProducts | null> {
@@ -406,6 +412,12 @@ function getMockStores(): StoreForList[] {
     { id: "a1b2c3d4-0014-4000-8000-000000000014", slug: "azar-malta", name: "Azar Malta", sector: "food", location: "Sliema", liveNow: true, viewers: 38, salesperson: "Chef", img: sectorImages.food },
     { id: "a1b2c3d4-0015-4000-8000-000000000015", slug: "mdina-glass", name: "Mdina Glass", sector: "tourism", location: "Ta' Qali", liveNow: false, viewers: 0, salesperson: "", img: sectorImages.tourism, googleReviews: 1234, tripadvisorReviews: 2103, rating: 4.7, vibeSummary: "Iconic Malta. Watch glassblowing. Unique pieces." },
     { id: "a1b2c3d4-0016-4000-8000-000000000016", slug: "frank-salt", name: "Frank Salt Real Estate", sector: "property", location: "Naxxar", liveNow: true, viewers: 22, salesperson: "Karl B.", img: sectorImages.property, googleReviews: 678, tripadvisorReviews: 445, rating: 4.6, vibeSummary: "Big agency. Huge inventory. Trusted name." },
+    { id: "a1b2c3d4-0017-4000-8000-000000000017", slug: "bay-street-complex", name: "Bay Street Complex", sector: "fashion", location: "St Julian's", liveNow: false, viewers: 0, salesperson: "", img: sectorImages.fashion, googleReviews: 892, tripadvisorReviews: 1104, rating: 4.2, vibeSummary: "Tourist-friendly mall. Open until 10pm. Brands + entertainment." },
+    { id: "a1b2c3d4-0018-4000-8000-000000000018", slug: "the-plaza-sliema", name: "The Plaza Shopping Centre", sector: "fashion", location: "Sliema", liveNow: false, viewers: 0, salesperson: "", img: sectorImages.fashion, googleReviews: 534, tripadvisorReviews: 412, rating: 4.0, vibeSummary: "Malta's OG mall since 1993. Fashion and makeup." },
+    { id: "a1b2c3d4-0023-4000-8000-000000000023", slug: "charles-ron-valletta", name: "Charles & Ron", sector: "fashion", location: "Valletta", liveNow: false, viewers: 0, salesperson: "", img: sectorImages.fashion, googleReviews: 567, tripadvisorReviews: 423, rating: 4.7, vibeSummary: "Malta's top fashion label. Mediterranean flair. Quality." },
+    { id: "a1b2c3d4-0024-4000-8000-000000000024", slug: "soap-cafe-valletta", name: "Soap Café", sector: "beauty", location: "Valletta", liveNow: false, viewers: 0, salesperson: "", img: sectorImages.beauty, googleReviews: 289, tripadvisorReviews: 198, rating: 4.6, vibeSummary: "Artisan beauty. Natural, local ingredients. Must-visit." },
+    { id: "a1b2c3d4-0025-4000-8000-000000000025", slug: "ta-qali-crafts-village", name: "Ta' Qali Crafts Village", sector: "tourism", location: "Attard", liveNow: false, viewers: 0, salesperson: "", img: sectorImages.tourism, googleReviews: 1234, tripadvisorReviews: 1876, rating: 4.5, vibeSummary: "Maltese artisans. Silver filigree, blown glass. Watch makers at work." },
+    { id: "a1b2c3d4-0041-4000-8000-000000000041", slug: "scan-malta", name: "Scan Malta", sector: "electronics", location: "Birkirkara", liveNow: false, viewers: 0, salesperson: "", img: sectorImages.electronics, googleReviews: 445, tripadvisorReviews: 267, rating: 4.5, vibeSummary: "Local tech shop. Gaming PCs. Knowledgeable staff." },
   ];
   return mock.map((s, i) => {
     const g = s.googleReviews ?? 0;
@@ -483,6 +495,23 @@ function getMockStoreBySlug(slug: string): StoreWithProducts | null {
       { id: "p2", name: "Lamb Chops", price: "€32", priceNum: 32, desc: "Wood-fired, herbs" },
     ],
     "the-point-mall": [],
+    "bay-street-complex": [{ id: "p1", name: "Gift Card", price: "€25", priceNum: 25, desc: "Use at any Bay Street store" }],
+    "charles-ron-valletta": [
+      { id: "p1", name: "Silk Blouse", price: "€165", priceNum: 165, desc: "Mediterranean collection" },
+      { id: "p2", name: "Leather Crossbody", price: "€195", priceNum: 195, desc: "Handcrafted" },
+    ],
+    "soap-cafe-valletta": [
+      { id: "p1", name: "Handmade Soap Set", price: "€18", priceNum: 18, desc: "3 soaps, local ingredients" },
+      { id: "p2", name: "Face Cream", price: "€32", priceNum: 32, desc: "Natural, Maltese olive oil" },
+    ],
+    "ta-qali-crafts-village": [
+      { id: "p1", name: "Silver Filigree Pendant", price: "€85", priceNum: 85, desc: "Handcrafted" },
+      { id: "p2", name: "Blown Glass Vase", price: "€45", priceNum: 45, desc: "Mdina style" },
+    ],
+    "scan-malta": [
+      { id: "p1", name: "Gaming Mouse", price: "€79", priceNum: 79, desc: "RGB, 16000 DPI" },
+      { id: "p2", name: "Mechanical Keyboard", price: "€129", priceNum: 129, desc: "Cherry MX" },
+    ],
   };
   const products = (mockProducts[slug] || [{ id: "p1", name: "Product", price: "€0", priceNum: 0, desc: "" }]).map((p) => ({
     ...p,
