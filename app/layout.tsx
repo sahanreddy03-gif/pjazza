@@ -74,6 +74,13 @@ function JsonLd() {
     logo: `${base}/pjazza/images/og-pjazza.jpg`,
     description: "Malta's live shopping marketplace. Video call stores, watch live streams, buy with escrow protection.",
     areaServed: { "@type": "Country", name: "Malta" },
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: "+356-79711799",
+      email: "hello@maltaverse.com",
+      contactType: "customer service",
+      areaServed: "MT",
+    },
   };
   const website = {
     "@context": "https://schema.org",
@@ -89,10 +96,20 @@ function JsonLd() {
       "query-input": "required name=search_term_string",
     },
   };
+  const localBusiness = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "PJAZZA by Maltaverse",
+    url: base,
+    telephone: "+356-79711799",
+    email: "hello@maltaverse.com",
+    address: { "@type": "PostalAddress", addressRegion: "Malta" },
+  };
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(org) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />
     </>
   );
 }

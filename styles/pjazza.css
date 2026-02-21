@@ -662,6 +662,36 @@ html {
   animation: pj-spin 1s linear infinite;
 }
 
+/* Skeleton loaders */
+.pj-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--pj-surface-2) 0%,
+    var(--pj-surface-3) 50%,
+    var(--pj-surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: pj-skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--pj-radius-sm);
+}
+
+.pj-skeleton-img {
+  border-radius: 0;
+}
+
+.pj-skeleton-line {
+  border-radius: 4px;
+}
+
+.pj-skeleton-card {
+  pointer-events: none;
+}
+
+@keyframes pj-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .pj-status-online {
   width: 8px;
   height: 8px;

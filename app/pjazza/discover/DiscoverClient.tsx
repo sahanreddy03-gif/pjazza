@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Utensils, Home, Ship, Car, ShoppingBag, Wrench, Heart,
@@ -20,7 +21,7 @@ const thumbCar = '/pjazza/images/thumb-car.jpg';
 function HeroSection({ liveCount }: { liveCount: number }) {
   return (
     <div className="pj-image-wash" style={{ position: 'relative', height: '40vh', minHeight: 280, maxHeight: 500 }}>
-      <img src={heroImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+      <Image src={heroImg} alt="" fill sizes="100vw" style={{ objectFit: 'cover', opacity: 0.6 }} />
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2 }}>
         <div className="pj-container" style={{ paddingBottom: 28 }}>
           <div className="pj-live-badge" style={{ marginBottom: 12 }}>

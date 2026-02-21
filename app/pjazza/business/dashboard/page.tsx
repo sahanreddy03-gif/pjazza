@@ -5,7 +5,7 @@ import {
   Eye, DollarSign, Star, Video, TrendingUp,
   Ship, MessageSquare, Clock,
   ChevronRight, Calendar,
-  Radio
+  Radio, Upload
 } from 'lucide-react';
 import PjAppShell from '@/components/PjAppShell';
 import ScrollReveal from '@/components/ScrollReveal';
@@ -311,6 +311,17 @@ export default function BusinessDashboard() {
 
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <GoLiveButton />
+          <button
+            className="pj-btn-primary pj-touch"
+            style={{ width: '100%', padding: '16px 24px', fontSize: 15, background: 'var(--pj-surface-2)', color: 'var(--pj-text)', border: '1px solid var(--pj-border)' }}
+            onClick={() => router.push('/pjazza/business/stream?tab=upload')}
+          >
+            <Upload size={18} style={{ marginRight: 8 }} />
+            Upload video
+          </button>
+          <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-tertiary)', textAlign: 'center', marginTop: -4 }}>
+            From phone or laptop — same flow. Record or upload, publish in seconds.
+          </p>
           <button
             className="pj-btn-secondary"
             style={{ width: '100%', padding: '16px 24px', fontSize: 15 }}

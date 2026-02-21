@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft, Video, Camera, Smartphone, Radio, Users, MessageSquare, Settings,
   Lightbulb, X, Upload, FileVideo, CheckCircle, Film, Type, Tag, Trash2, Play, Square, Store
@@ -340,8 +340,10 @@ function VideoLibrary({ videos, onDelete, onRefresh }: { videos: StoredVideo[]; 
 
 export default function RecordingStudio() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
   const [preset, setPreset] = useState('product');
-  const [mode, setMode] = useState<'live' | 'upload' | 'library'>('live');
+  const [mode, setMode] = useState<'live' | 'upload' | 'library'>(tabParam === 'upload' ? 'upload' : 'live');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isLive, setIsLive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);

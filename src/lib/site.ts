@@ -22,6 +22,10 @@ export const SITE = {
     'escrow Malta',
     'live streaming Malta',
     'v-commerce Malta',
+    'upload video Malta',
+    'business Malta',
+    'sell online Malta',
+    'live commerce',
   ],
   openGraph: {
     type: 'website',

@@ -200,6 +200,43 @@ function ProblemSection() {
   );
 }
 
+function WhyPjazzaSection() {
+  const items = [
+    { con: 'I don\'t have time', strength: '60 seconds to go live. Upload once, plays 24/7. No editing needed.', icon: '⏱' },
+    { con: 'I\'m not techy', strength: 'Just your phone. No software, no setup. Works in the app or on the website.', icon: '📱' },
+    { con: 'Will anyone see it?', strength: 'Built-in audience. Every buyer browsing your sector sees you. No followers needed.', icon: '👁' },
+    { con: 'What if no one buys?', strength: 'Pay only when you earn. 90 days free. Zero risk to try.', icon: '✓' },
+    { con: 'Competitors might copy', strength: 'Be first. Malta\'s only live shopping marketplace. Early movers get featured.', icon: '🚀' },
+  ];
+
+  return (
+    <div className="pj-section">
+      <ScrollReveal>
+        <span className="pj-label" style={{ display: 'block', marginBottom: 8 }}>WHY PJAZZA</span>
+        <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', marginBottom: 12, letterSpacing: '-0.01em' }}>
+          Every objection.
+          <br />
+          <span style={{ color: 'var(--pj-gold)' }}>Turned into a strength.</span>
+        </h2>
+        <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', marginBottom: 24, lineHeight: 1.5 }}>
+          We built PJAZZA so busy owners like you can sell more — without the hassle.
+        </p>
+      </ScrollReveal>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {items.map((item, i) => (
+          <ScrollReveal key={i} delay={i * 60}>
+            <div className="pj-card" style={{ padding: 16, borderLeft: '3px solid var(--pj-red)' }}>
+              <p style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-text-tertiary)', marginBottom: 4, fontStyle: 'italic' }}>“{item.con}”</p>
+              <p style={{ fontSize: 'var(--pj-size-body)', color: 'var(--pj-text)', fontWeight: 600, lineHeight: 1.5 }}>→ {item.strength}</p>
+            </div>
+          </ScrollReveal>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SolutionSection() {
   const features = [
     { Icon: Eye, title: 'Go live in 60 seconds', desc: 'Point your phone. Show your product, skill, or space. Start selling.' },
@@ -409,6 +446,8 @@ export default function BusinessOnboard() {
       <PitchHero />
       <div className="pj-divider" />
       <ProblemSection />
+      <div className="pj-divider" />
+      <WhyPjazzaSection />
       <div className="pj-divider" />
       <SolutionSection />
       <BrandMarquee />

@@ -1,11 +1,12 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   ArrowRight, Play, Eye, Star, CheckCircle, Shield,
   Utensils, Home, Ship, Car, Heart, Wrench,
   ShoppingBag, Smartphone, GraduationCap, PawPrint, Compass,
-  Users, Video, MessageSquare, ChevronRight, Briefcase
+  Users, Video, MessageSquare, ChevronRight, Briefcase, Quote
 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 import BrandMarquee from '@/components/BrandMarquee';
@@ -29,10 +30,13 @@ function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?:
 
   return (
     <div className="pj-image-wash" style={{ position: 'relative', minHeight: '75vh', display: 'flex', alignItems: 'flex-end' }}>
-      <img
+      <Image
         src={heroImg}
         alt=""
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
+        fill
+        sizes="100vw"
+        priority
+        style={{ objectFit: 'cover', opacity: 0.45 }}
       />
       <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
         <div className="pj-container" style={{ paddingBottom: 48, paddingTop: 80 }}>
@@ -124,7 +128,16 @@ function LiveNowPreview({ streams }: { streams: StreamForList[] }) {
       </ScrollReveal>
 
       <div className="pj-stream-grid">
-        {streams.map((stream, i) => (
+        {streams.length === 0 ? (
+          <ScrollReveal>
+            <div className="pj-card" style={{ padding: 40, textAlign: 'center', minWidth: 200 }}>
+              <Video size={40} style={{ color: 'var(--pj-text-muted)', marginBottom: 12, display: 'block', margin: '0 auto 12px' }} />
+              <p style={{ fontSize: 'var(--pj-size-body)', fontWeight: 600, color: 'var(--pj-text)', marginBottom: 4 }}>No live streams right now</p>
+              <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', marginBottom: 16 }}>Check back soon — new streams go live daily</p>
+              <button className="pj-btn-secondary pj-touch" onClick={() => router.push('/pjazza/live-shop')}>Browse Live Shop</button>
+            </div>
+          </ScrollReveal>
+        ) : streams.map((stream, i) => (
           <ScrollReveal key={i} delay={i * 60}>
             <div
               className="pj-card pj-touch"
@@ -461,6 +474,41 @@ function PeoplePreview() {
   );
 }
 
+function Testimonials() {
+  const items = [
+    { quote: 'Finally — I can show customers exactly what they\'re getting. No more misunderstandings.', author: 'Maria G.', role: 'Restaurant owner, Sliema' },
+    { quote: 'Sold a €4,200 watch in 12 minutes. Live video made the difference.', author: 'David M.', role: 'Luxury retail, Valletta' },
+    { quote: 'Clients love seeing the property live before they fly over. Saves everyone time.', author: 'Sarah K.', role: 'Property agent' },
+  ];
+
+  return (
+    <div className="pj-section" style={{ paddingTop: 48, paddingBottom: 48 }}>
+      <ScrollReveal>
+        <span className="pj-label" style={{ display: 'block', marginBottom: 8 }}>TRUSTED BY BUSINESSES</span>
+        <h2 style={{ fontSize: 'var(--pj-size-h1)', fontWeight: 800, color: 'var(--pj-text)', marginBottom: 40, letterSpacing: '-0.02em' }}>
+          What sellers are saying
+        </h2>
+      </ScrollReveal>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {items.map((t, i) => (
+          <ScrollReveal key={i} delay={i * 80}>
+            <div className="pj-card" style={{ padding: 24, borderColor: 'var(--pj-border-hover)' }}>
+              <Quote size={24} style={{ color: 'var(--pj-red)', opacity: 0.5, marginBottom: 12 }} />
+              <p style={{ fontSize: 'var(--pj-size-body)', color: 'var(--pj-text-secondary)', lineHeight: 1.7, marginBottom: 16 }}>
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <div>
+                <span style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700, color: 'var(--pj-text)' }}>{t.author}</span>
+                <span style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}> · {t.role}</span>
+              </div>
+            </div>
+          </ScrollReveal>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function B2BEnterprise() {
   const router = useRouter();
   return (
@@ -578,6 +626,8 @@ export default function LandingClient({ initialStreams, liveCount, businessCount
       <PeoplePreview />
       <div className="pj-divider" />
       <HowItWorksPreview />
+      <div className="pj-divider" />
+      <Testimonials />
       <div className="pj-divider" />
       <B2BEnterprise />
       <div className="pj-divider" />
