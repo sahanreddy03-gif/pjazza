@@ -6,7 +6,7 @@ import { Badge, Button } from "@/src/components/ui";
 
 export default function SplashPage() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-8 py-16">
+    <main className="min-h-screen flex flex-col items-center justify-center px-8 py-16 w-full max-w-[420px] mx-auto">
       <div className="w-full max-w-sm flex flex-col items-center text-center animate-fade-in">
         <h1 className="text-4xl font-semibold tracking-tight text-ink">
           PJAZZA
@@ -31,10 +31,10 @@ export default function SplashPage() {
         </div>
 
         <div className="w-full flex flex-col gap-3 mt-12">
-          <Button href="/discover" variant="primary" fullWidth>
+          <Button href="/pjazza" variant="primary" fullWidth>
             I&apos;m Exploring
           </Button>
-          <Button href="/business/onboard" variant="ghost" fullWidth>
+          <Button href="/pjazza/business/onboard" variant="ghost" fullWidth>
             I&apos;m a Business
           </Button>
         </div>

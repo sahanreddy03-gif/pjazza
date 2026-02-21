@@ -29,6 +29,13 @@ switch ($cmd) {
   }
   "save" {
     $msg = if ($argsList.Count -gt 1) { $argsList[1..($argsList.Count-1)] -join " " } else { "Update" }
+    Write-Host "Running checks (lint + build)..." -ForegroundColor Cyan
+    npm run check 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Host "Checks failed. Fix errors before committing." -ForegroundColor Red
+      exit 1
+    }
+    Write-Host "Checks passed." -ForegroundColor Green
     & $git -C $repo add -A
     & $git -C $repo commit -m $msg
   }
