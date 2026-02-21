@@ -369,9 +369,11 @@ export default function RecordingStudio() {
   }, [stream]);
 
   useEffect(() => {
-    if (mode === 'live') startCamera();
-    else stopCamera();
-    return () => { if (mode !== 'live') stopCamera(); };
+    if (mode === 'live') {
+      const id = setTimeout(() => startCamera(), 0);
+      return () => { clearTimeout(id); stopCamera(); };
+    }
+    stopCamera();
   }, [mode]);
 
   const startRecording = async () => {

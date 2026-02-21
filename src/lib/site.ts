@@ -27,6 +27,11 @@ export const SITE = {
     type: 'website',
     siteName: 'PJAZZA by Maltaverse',
   },
+  contact: {
+    phone: '+356 79711799',
+    email: 'hello@maltaverse.com',
+    supportEmail: 'hello@maltaverse.com',
+  },
 } as const;
 
 export const SECTOR_SLUGS = [

@@ -60,8 +60,13 @@ export default function HelpPage() {
         </div>
         <div style={{ marginTop: 32, padding: 20, background: 'var(--pj-surface-1)', borderRadius: 'var(--pj-radius-lg)', border: '1px solid var(--pj-border)' }}>
           <p style={{ fontSize: 'var(--pj-size-small)', fontWeight: 600, color: 'var(--pj-text)', marginBottom: 8 }}>Still need help?</p>
-          <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', marginBottom: 12 }}>Email us at support@pjazza.com. We typically reply within 24 hours.</p>
-          <a href="mailto:support@pjazza.com" style={{ fontSize: 'var(--pj-size-small)', fontWeight: 600, color: 'var(--pj-red)', textDecoration: 'none' }}>support@pjazza.com</a>
+          <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', marginBottom: 12 }}>
+            Call us at <a href="tel:+35679711799" style={{ color: 'var(--pj-red)', textDecoration: 'none', fontWeight: 600 }}>+356 79711799</a> or email <a href="mailto:hello@maltaverse.com" style={{ color: 'var(--pj-red)', textDecoration: 'none', fontWeight: 600 }}>hello@maltaverse.com</a>. We typically reply within 24 hours.
+          </p>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <a href="tel:+35679711799" className="pj-btn-secondary" style={{ textDecoration: 'none', color: 'inherit' }}>Call +356 79711799</a>
+            <a href="/pjazza/contact" className="pj-btn-primary" style={{ textDecoration: 'none', color: 'white' }}>Contact form</a>
+          </div>
         </div>
       </div>
     </div>

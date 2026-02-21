@@ -64,7 +64,7 @@ export default function BottomNav() {
             return (
               <button
                 key={tab.id}
-                className="pj-touch"
+                className={`pj-touch pj-bottom-nav-btn ${isActive ? 'active' : ''}`}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',

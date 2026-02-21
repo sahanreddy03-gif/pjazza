@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import {
   Eye, DollarSign, Star, Video, TrendingUp,
-  Ship, MessageSquare, ArrowRight, Clock,
-  ChevronRight, Users, CheckCircle, Calendar,
+  Ship, MessageSquare, Clock,
+  ChevronRight, Calendar,
   Radio
 } from 'lucide-react';
 import PjAppShell from '@/components/PjAppShell';
@@ -301,7 +301,7 @@ export default function BusinessDashboard() {
             </div>
           </div>
           <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>
-            Noni's Kitchen · Sliema
+            Noni&apos;s Kitchen · Sliema
           </p>
         </ScrollReveal>
       </div>
@@ -319,6 +319,14 @@ export default function BusinessDashboard() {
             <Video size={18} style={{ marginRight: 8 }} />
             Accept live video calls
           </button>
+          <a
+            href="/pjazza/agent"
+            className="pj-btn-ghost"
+            style={{ width: '100%', padding: 12, justifyContent: 'center', textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: 8 }}
+          >
+            Sales team: Agent portal
+            <ChevronRight size={16} />
+          </a>
         </div>
 
         <div style={{ marginTop: 20 }}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, Bell, Home, Briefcase, Info, Grid3X3, Users, ShoppingBag, HelpCircle } from 'lucide-react';
+import { Search, Bell, Home, Briefcase, Info, Grid3X3, Users, ShoppingBag, HelpCircle, Phone } from 'lucide-react';
 
 const desktopLinks = [
   { id: 'home', Icon: Home, label: 'Home', path: '/pjazza/discover' },
@@ -10,6 +10,7 @@ const desktopLinks = [
   { id: 'people', Icon: Users, label: 'People', path: '/pjazza/people' },
   { id: 'how', Icon: Info, label: 'How It Works', path: '/pjazza/how-it-works' },
   { id: 'help', Icon: HelpCircle, label: 'Help', path: '/pjazza/help' },
+  { id: 'contact', Icon: Phone, label: 'Contact', path: '/pjazza/contact' },
   { id: 'business', Icon: Briefcase, label: 'Business', path: '/pjazza/business/dashboard' },
 ];
 
@@ -23,6 +24,7 @@ export default function TopBar() {
     if (pathname.includes('/people')) return 'people';
     if (pathname.includes('/how-it-works')) return 'how';
     if (pathname.includes('/help')) return 'help';
+    if (pathname.includes('/contact')) return 'contact';
     if (pathname.includes('/business')) return 'business';
     if (pathname === '/pjazza/discover') return 'home';
     return '';

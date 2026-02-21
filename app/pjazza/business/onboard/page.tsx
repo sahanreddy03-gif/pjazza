@@ -378,7 +378,7 @@ function FinalCTA() {
     <div className="pj-section" style={{ textAlign: 'center' }}>
       <ScrollReveal>
         <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 800, color: 'var(--pj-text)', marginBottom: 8, letterSpacing: '-0.01em' }}>
-          Malta's first 180 businesses get
+          Malta&apos;s first 180 businesses get
           <br />
           <span style={{ color: 'var(--pj-gold)' }}>Founding Partner status.</span>
         </h2>

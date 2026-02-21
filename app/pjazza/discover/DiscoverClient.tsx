@@ -49,7 +49,7 @@ function QuickLinks() {
       <div className="pj-section-tight" style={{ paddingBottom: 0 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
-            className="pj-btn-secondary"
+            className="pj-btn-secondary pj-touch"
             style={{ flex: 1, justifyContent: 'center', gap: 6 }}
             onClick={() => router.push('/pjazza/how-it-works')}
             data-testid="button-link-how"
@@ -57,7 +57,7 @@ function QuickLinks() {
             <Info size={14} /> How It Works
           </button>
           <button
-            className="pj-btn-secondary"
+            className="pj-btn-secondary pj-touch"
             style={{ flex: 1, justifyContent: 'center', gap: 6 }}
             onClick={() => router.push('/pjazza/sectors')}
             data-testid="button-link-sectors"

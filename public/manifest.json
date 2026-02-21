@@ -1,0 +1,20 @@
+{
+  "name": "PJAZZA — Malta's Live Shopping",
+  "short_name": "PJAZZA",
+  "description": "Video call stores, watch live streams, buy with escrow. Malta's live marketplace.",
+  "start_url": "/pjazza",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/pjazza/images/logo-white.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "lifestyle", "business"]
+}

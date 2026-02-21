@@ -5,7 +5,7 @@ import {
   ArrowRight, Play, Eye, Star, CheckCircle, Shield,
   Utensils, Home, Ship, Car, Heart, Wrench,
   ShoppingBag, Smartphone, GraduationCap, PawPrint, Compass,
-  Users, Video, MessageSquare, ChevronRight
+  Users, Video, MessageSquare, ChevronRight, Briefcase
 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 import BrandMarquee from '@/components/BrandMarquee';
@@ -76,7 +76,7 @@ function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?:
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, maxWidth: 440 }}>
             <button
-              className="pj-btn-primary"
+              className="pj-btn-primary pj-touch"
               style={{ flex: 1, minWidth: 180, padding: '18px 24px', fontSize: 16 }}
               onClick={() => router.push('/pjazza/live-shop')}
               data-testid="button-start-shopping"
@@ -85,7 +85,7 @@ function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?:
               <span>Shop Live</span>
             </button>
             <button
-              className="pj-btn-secondary"
+              className="pj-btn-secondary pj-touch"
               style={{ flex: 1, minWidth: 160, padding: '16px 24px' }}
               onClick={() => router.push('/pjazza/business/onboard')}
               data-testid="button-sell-on-pjazza"
@@ -461,6 +461,41 @@ function PeoplePreview() {
   );
 }
 
+function B2BEnterprise() {
+  const router = useRouter();
+  return (
+    <div className="pj-section" style={{ paddingTop: 48, paddingBottom: 48 }}>
+      <ScrollReveal>
+        <span className="pj-label" style={{ display: 'block', marginBottom: 8 }}>B2B & ENTERPRISE</span>
+        <h2 style={{ fontSize: 'var(--pj-size-h1)', fontWeight: 800, color: 'var(--pj-text)', marginBottom: 16, letterSpacing: '-0.02em' }}>
+          Built for brands.
+          <br />
+          <span style={{ color: 'var(--pj-gold)' }}>Retail, hospitality & more.</span>
+        </h2>
+        <p style={{ fontSize: 'var(--pj-size-body)', color: 'var(--pj-text-secondary)', lineHeight: 1.6, maxWidth: 520, marginBottom: 28 }}>
+          From global brands to local chains — PJAZZA powers live shopping for fashion, restaurants, hotels, and retail. Your sales team gets a mobile app to receive calls and assist customers in real time. One platform for your whole market.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          <button
+            className="pj-btn-primary"
+            style={{ minWidth: 200, padding: '16px 24px' }}
+            onClick={() => router.push('/pjazza/contact')}
+          >
+            <Briefcase size={18} style={{ marginRight: 8 }} />
+            Get in touch
+          </button>
+          <button
+            className="pj-btn-secondary"
+            onClick={() => router.push('/pjazza/how-it-works')}
+          >
+            See how it works
+          </button>
+        </div>
+      </ScrollReveal>
+    </div>
+  );
+}
+
 function FinalCTA({ businessCount = 60 }: { businessCount?: number }) {
   const router = useRouter();
 
@@ -475,9 +510,9 @@ function FinalCTA({ businessCount = 60 }: { businessCount?: number }) {
         <p style={{ fontSize: 'var(--pj-size-body)', color: 'var(--pj-text-tertiary)', marginBottom: 32, lineHeight: 1.6, maxWidth: 380, margin: '0 auto 32px' }}>
         12 sectors. {businessCount}+ businesses. One marketplace.
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', maxWidth: 440, margin: '0 auto' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', maxWidth: 480, margin: '0 auto' }}>
           <button
-            className="pj-btn-primary"
+            className="pj-btn-primary pj-touch"
             style={{ minWidth: 180, padding: '18px 24px', fontSize: 16 }}
             onClick={() => router.push('/pjazza/live-shop')}
             data-testid="button-explore-now"
@@ -486,12 +521,20 @@ function FinalCTA({ businessCount = 60 }: { businessCount?: number }) {
             <span>Shop Live</span>
           </button>
           <button
-            className="pj-btn-secondary"
+            className="pj-btn-secondary pj-touch"
             style={{ minWidth: 160, padding: '16px 24px' }}
             onClick={() => router.push('/pjazza/business/onboard')}
             data-testid="button-list-business"
           >
             List Your Business
+          </button>
+          <button
+            className="pj-btn-ghost pj-touch"
+            style={{ minWidth: 140, padding: '14px 20px', fontSize: 14 }}
+            onClick={() => router.push('/pjazza/install')}
+          >
+            <Smartphone size={16} style={{ marginRight: 6 }} />
+            Install app
           </button>
         </div>
       </ScrollReveal>
@@ -535,6 +578,8 @@ export default function LandingClient({ initialStreams, liveCount, businessCount
       <PeoplePreview />
       <div className="pj-divider" />
       <HowItWorksPreview />
+      <div className="pj-divider" />
+      <B2BEnterprise />
       <div className="pj-divider" />
       <FinalCTA businessCount={businessCount} />
       <div style={{ height: 48 }} />
