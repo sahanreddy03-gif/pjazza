@@ -4,8 +4,9 @@ import { useRef, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { useMousePosition } from '@/src/hooks/useMousePosition';
 import { useElementRect } from '@/src/hooks/useElementRect';
 
-const MAX_TILT = 8;
-const SMOOTH = 0.12;
+const MAX_TILT = 10;
+const PULL = 10;
+const SMOOTH = 0.14;
 
 export default function TiltCard({
   children,
@@ -24,6 +25,7 @@ export default function TiltCard({
   const rect = useElementRect(ref);
   const { x, y } = useMousePosition();
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [pull, setPull] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
@@ -38,11 +40,17 @@ export default function TiltCard({
       const centerY = rect.top + rect.height / 2;
       const relX = (x - centerX) / (rect.width / 2);
       const relY = (y - centerY) / (rect.height / 2);
-      const targetX = Math.max(-1, Math.min(1, relX)) * MAX_TILT;
-      const targetY = Math.max(-1, Math.min(1, relY)) * -MAX_TILT;
+      const targetTiltX = Math.max(-1, Math.min(1, relX)) * MAX_TILT;
+      const targetTiltY = Math.max(-1, Math.min(1, relY)) * -MAX_TILT;
+      const targetPullX = Math.max(-1, Math.min(1, (x - centerX) / rect.width)) * PULL;
+      const targetPullY = Math.max(-1, Math.min(1, (y - centerY) / rect.height)) * PULL;
       setTilt((prev) => ({
-        x: prev.x + (targetX - prev.x) * SMOOTH,
-        y: prev.y + (targetY - prev.y) * SMOOTH,
+        x: prev.x + (targetTiltX - prev.x) * SMOOTH,
+        y: prev.y + (targetTiltY - prev.y) * SMOOTH,
+      }));
+      setPull((prev) => ({
+        x: prev.x + (targetPullX - prev.x) * SMOOTH,
+        y: prev.y + (targetPullY - prev.y) * SMOOTH,
       }));
       raf = requestAnimationFrame(loop);
     };
@@ -54,6 +62,7 @@ export default function TiltCard({
   const onLeave = useCallback(() => {
     setIsHovered(false);
     setTilt({ x: 0, y: 0 });
+    setPull({ x: 0, y: 0 });
   }, []);
 
   return (
@@ -62,7 +71,7 @@ export default function TiltCard({
       className={className}
       style={{
         ...style,
-        transform: `perspective(1000px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`,
+        transform: `translate(${pull.x}px, ${pull.y}px) perspective(1000px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`,
         transition: isHovered ? 'transform 0.05s ease-out' : 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)',
       }}
       onMouseEnter={onEnter}

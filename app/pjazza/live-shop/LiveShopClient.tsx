@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import TiltCard from '@/components/TiltCard';
 import { useViewTransition } from '@/src/hooks/useViewTransition';
-import { haptic } from '@/src/utils/haptic';
+import { haptic, ctaFeedback } from '@/src/utils/haptic';
 import {
   ArrowLeft, ArrowRight, Star, CheckCircle, Video, Search,
   Utensils, Home, Ship, Car, Heart, Wrench, Smartphone,
@@ -196,7 +196,7 @@ function StoreCard({ store, index }: { store: StoreForList; index: number }) {
   return (
     <ScrollReveal delay={index * 40}>
       <TiltCard
-        className="pj-card pj-card-store pj-touch"
+        className="pj-card pj-card-store pj-card-glow pj-touch"
         style={{ padding: 0, overflow: 'hidden', cursor: 'pointer' }}
         onClick={() => { haptic('light'); push(href); }}
         data-testid={`card-store-${index}`}
@@ -297,7 +297,7 @@ function BottomCTA() {
         <p style={{ fontSize: 'var(--pj-size-body)', color: 'var(--pj-text-tertiary)', marginBottom: 24, lineHeight: 1.6 }}>
           Go live and sell to all of Malta from your shop floor.
         </p>
-        <button className="pj-btn-primary" style={{ minWidth: 200, padding: '18px 24px', fontSize: 16 }} onClick={() => { haptic('light'); push('/pjazza/business/onboard'); }} data-testid="button-list-your-shop">
+        <button className="pj-btn-primary" style={{ minWidth: 200, padding: '18px 24px', fontSize: 16 }} onClick={() => { ctaFeedback(); push('/pjazza/business/onboard'); }} data-testid="button-list-your-shop">
           <span>List Your Shop</span>
           <ArrowRight size={18} strokeWidth={2.5} />
         </button>

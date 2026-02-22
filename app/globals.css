@@ -121,14 +121,14 @@ body {
   animation: pj-fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* 3. Float: subtle vertical bobbing for stats and trust badges */
+/* 3. Float: subtle vertical bobbing for stats and trust badges — more alive */
 @keyframes pj-float {
-  0%, 100% { transform: translateY(-2px); }
-  50% { transform: translateY(2px); }
+  0%, 100% { transform: translateY(-3px); opacity: 1; }
+  50% { transform: translateY(3px); opacity: 0.92; }
 }
 
 .pj-float {
-  animation: pj-float 4s ease-in-out infinite;
+  animation: pj-float 5s ease-in-out infinite;
 }
 
 /* Page enter — subtle fade on navigation */

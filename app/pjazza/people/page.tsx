@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import TiltCard from '@/components/TiltCard';
 import {
   ArrowLeft, ArrowRight, Star, CheckCircle, Video, Search,
   Wrench, Scale, Waves, Heart, Palette, Scissors,
@@ -158,8 +159,8 @@ function CategoryFilters({ active, onChange }: { active: string; onChange: (v: s
 function PersonCard({ person, index }: { person: typeof people[0]; index: number }) {
   return (
     <ScrollReveal delay={index * 40}>
-      <div
-        className="pj-card pj-touch"
+      <TiltCard
+        className="pj-card pj-card-glow pj-touch"
         style={{ padding: 0, overflow: 'hidden' }}
         data-testid={`card-person-${index}`}
       >
@@ -253,7 +254,7 @@ function PersonCard({ person, index }: { person: typeof people[0]; index: number
             )}
           </div>
         </div>
-      </div>
+      </TiltCard>
     </ScrollReveal>
   );
 }

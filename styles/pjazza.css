@@ -148,6 +148,14 @@ html {
   box-sizing: border-box;
 }
 
+/* Hero words — word-by-word entrance (GSAP animates .pj-hero-word) */
+.pj-hero-word {
+  display: inline-block;
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
 /* Content container — centers and caps content width */
 .pj-container {
   width: 100%;
@@ -157,13 +165,69 @@ html {
   padding-right: var(--pj-section-padding);
 }
 
-/* Cards — hover lift & shadow */
+/* Cards — hover lift, shadow + shine */
 .pj-card {
+  position: relative;
+  overflow: hidden;
   background: var(--pj-surface-1);
   border: 1px solid var(--pj-border);
   border-radius: var(--pj-radius-lg);
   transition: transform var(--pj-duration-smooth) var(--pj-ease-out), border-color var(--pj-duration-normal) var(--pj-ease-smooth), box-shadow var(--pj-duration-smooth) var(--pj-ease-out);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+.pj-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 40%, transparent 60%, rgba(225,29,72,0.15) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.pj-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255,255,255,0.03) 45%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.03) 55%,
+    transparent 60%
+  );
+  transform: translateX(-100%) rotate(25deg);
+  transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .pj-card:hover::before { opacity: 1; }
+  .pj-card:hover::after { transform: translateX(100%) rotate(25deg); }
+}
+
+/* Bold card glow — stronger hover presence */
+.pj-card-glow {
+  --pj-glow-color: rgba(225, 29, 72, 0.35);
+}
+@media (min-width: 768px) {
+  .pj-card-glow:hover {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255,255,255,0.06),
+                0 0 40px var(--pj-glow-color);
+    transform: translateY(-8px) scale(1.02);
+  }
+  .pj-card-glow:hover .pj-card-img-zoom {
+    transform: scale(1.08);
+  }
 }
 
 .pj-card:active {
@@ -218,9 +282,16 @@ html {
 }
 
 .pj-btn-primary:hover {
-  opacity: 0.94;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.4);
+  opacity: 0.98;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(225, 29, 72, 0.5), 0 0 0 1px rgba(255,255,255,0.1);
+}
+.pj-btn-primary:hover svg {
+  animation: pj-cta-pulse 0.6s ease-in-out;
+}
+@keyframes pj-cta-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
 }
 
 .pj-btn-primary:active {
@@ -344,8 +415,8 @@ html {
 }
 
 @keyframes pj-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5); }
-  50% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 6px rgba(225, 29, 72, 0); }
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.6), 0 0 8px rgba(225, 29, 72, 0.3); }
+  50% { opacity: 0.9; transform: scale(1.15); box-shadow: 0 0 0 8px rgba(225, 29, 72, 0), 0 0 12px rgba(225, 29, 72, 0.4); }
 }
 
 @keyframes pj-glow {
@@ -615,17 +686,17 @@ html {
   flex-shrink: 0;
 }
 
-/* Scroll Reveal Animation */
+/* Scroll Reveal — scale + fade + slide for alive feel */
 .pj-reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1),
-              transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform: translateY(28px) scale(0.97);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pj-reveal.pj-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .pj-stagger > .pj-reveal:nth-child(1) { transition-delay: 0ms; }
@@ -653,38 +724,49 @@ html {
   100% { transform: translateX(-50%); }
 }
 
-/* Ambient hero orbs — slow-moving gradient blobs */
+/* Ambient hero orbs — stronger, more visible atmosphere */
 .pj-ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.25;
+  filter: blur(90px);
+  opacity: 0.45;
   pointer-events: none;
   z-index: 0;
 }
 
 .pj-ambient-orb-1 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(225, 29, 72, 0.3) 0%, transparent 70%);
-  top: -100px;
-  right: -100px;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(225, 29, 72, 0.45) 0%, rgba(225, 29, 72, 0.1) 40%, transparent 70%);
+  top: -120px;
+  right: -120px;
   animation: pj-orb-float-1 20s ease-in-out infinite;
 }
 
 .pj-ambient-orb-2 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(212, 165, 116, 0.2) 0%, transparent 70%);
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(212, 165, 116, 0.35) 0%, rgba(212, 165, 116, 0.08) 40%, transparent 70%);
   bottom: 20%;
-  left: -80px;
+  left: -100px;
   animation: pj-orb-float-2 25s ease-in-out infinite;
 }
 
+/* Subtle grain overlay for hero — film-like texture */
+.pj-hero-ambient::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .pj-ambient-orb-3 {
-  width: 250px;
-  height: 250px;
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.25) 0%, rgba(34, 197, 94, 0.06) 40%, transparent 70%);
   top: 50%;
   left: 50%;
   animation: pj-orb-float-3 18s ease-in-out infinite;
@@ -871,6 +953,24 @@ html {
   flex-shrink: 0;
 }
 
+/* Stream cards: enforce equal height so long names (e.g. Blue Harbour Charters) align */
+.pj-stream-grid .pj-card {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pj-stream-grid .pj-card > div:last-child {
+  flex: 1;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+}
+.pj-stream-grid .pj-card .pj-card-stream-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @media (min-width: 768px) {
   .pj-stream-grid {
     display: grid;
@@ -1001,13 +1101,27 @@ html {
   }
 }
 
-/* Bottom nav buttons — touch feedback */
+/* Bottom nav buttons — touch + hover micro-motion */
 .pj-bottom-nav-btn {
-  transition: transform 0.2s var(--pj-ease-out), opacity 0.15s ease;
+  transition: transform 0.25s var(--pj-ease-out), opacity 0.2s ease, color 0.2s ease;
+}
+@media (min-width: 768px) {
+  .pj-bottom-nav-btn:hover {
+    transform: scale(1.08);
+  }
+}
+.pj-bottom-nav-btn:active {
+  transform: scale(0.92);
 }
 
-.pj-bottom-nav-btn:active {
-  transform: scale(0.9);
+/* Nav link hover — ghost buttons, etc. */
+.pj-nav-hover {
+  transition: transform 0.2s var(--pj-ease-out), color 0.2s ease;
+}
+@media (min-width: 768px) {
+  .pj-nav-hover:hover {
+    transform: translateX(4px);
+  }
 }
 
 @media (min-width: 1024px) {
@@ -1042,12 +1156,14 @@ html {
     font-weight: 600;
     color: var(--pj-text-tertiary);
     cursor: pointer;
-    transition: color 0.15s ease, background 0.15s ease;
+    transition: color 0.2s ease, background 0.2s ease, transform 0.2s var(--pj-ease-out), box-shadow 0.2s ease;
     -webkit-tap-highlight-color: transparent;
   }
   .pj-desktop-nav-item:hover {
-    color: var(--pj-text-secondary);
+    color: var(--pj-text);
     background: var(--pj-surface-2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   .pj-desktop-nav-item.active {
     color: var(--pj-text);

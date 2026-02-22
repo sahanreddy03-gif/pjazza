@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import TiltCard from '@/components/TiltCard';
 import {
   ArrowRight, ArrowLeft, Utensils, Home, Ship, Car, Heart,
   Wrench, ShoppingBag, Smartphone, GraduationCap, PawPrint,
@@ -200,9 +201,9 @@ function SectorCard({ sector, index }: { sector: typeof allSectors[0]; index: nu
 
   return (
     <ScrollReveal delay={index * 40}>
-      <div
+      <TiltCard
         id={`sector-${sector.id}`}
-        className="pj-card"
+        className="pj-card pj-card-glow"
         style={{ padding: 0, overflow: 'hidden', scrollMarginTop: 80 }}
         data-testid={`card-sector-${sector.id}`}
       >
@@ -275,7 +276,7 @@ function SectorCard({ sector, index }: { sector: typeof allSectors[0]; index: nu
             </button>
           </div>
         </div>
-      </div>
+      </TiltCard>
     </ScrollReveal>
   );
 }

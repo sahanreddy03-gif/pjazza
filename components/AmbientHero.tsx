@@ -1,10 +1,12 @@
 'use client';
 
 import { type ReactNode } from 'react';
+import HeroParticles from './HeroParticles';
 
 export default function AmbientHero({ children }: { children: ReactNode }) {
   return (
-    <div style={{ position: 'relative', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', overflow: 'hidden' }} className="pj-hero-ambient">
+      <HeroParticles />
       {/* Animated gradient orbs — ambient background */}
       <div
         className="pj-ambient-orb pj-ambient-orb-1"

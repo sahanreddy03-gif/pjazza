@@ -98,7 +98,7 @@ function LiveNowSection({ streams }: { streams: StreamForList[] }) {
         {streams.map((stream, i) => (
           <ScrollReveal key={i} delay={i * 60}>
             <TiltCard
-              className="pj-card pj-touch"
+              className="pj-card pj-card-glow pj-touch"
               style={{ width: 200, overflow: 'hidden', cursor: 'pointer' }}
               onClick={() => { haptic('light'); stream.slug ? push(`/pjazza/live-shop/${stream.slug}`) : push('/pjazza/live-shop'); }}
               role="button"
@@ -123,11 +123,11 @@ function LiveNowSection({ streams }: { streams: StreamForList[] }) {
                 </div>
               </div>
               <div style={{ padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
-                  <span style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700, color: 'var(--pj-text)' }}>{stream.name}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2, minWidth: 0 }}>
+                  <span className="pj-card-stream-name" style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700, color: 'var(--pj-text)' }}>{stream.name}</span>
                   <CheckCircle size={12} style={{ color: 'var(--pj-green)', flexShrink: 0 }} />
                 </div>
-                <p style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-text-tertiary)', marginBottom: 8 }}>
+                <p className="pj-card-stream-name" style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-text-tertiary)', marginBottom: 8 }}>
                   {stream.location} · {stream.category}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -317,7 +317,7 @@ function HighValueSection() {
       <div className="pj-listing-grid">
         {items.map((item, i) => (
           <ScrollReveal key={i} delay={i * 80}>
-            <TiltCard className="pj-card pj-touch" style={{ overflow: 'hidden', cursor: 'pointer' }} onClick={() => { haptic('light'); push('/pjazza/discover'); }} data-testid={`card-listing-${i}`}>
+            <TiltCard className="pj-card pj-card-glow pj-touch" style={{ overflow: 'hidden', cursor: 'pointer' }} onClick={() => { haptic('light'); push('/pjazza/discover'); }} data-testid={`card-listing-${i}`}>
               <div style={{ display: 'flex' }}>
                 <div style={{ width: 120, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                   <img src={item.img} alt={item.title} className="pj-card-img-zoom" style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 100 }} />
