@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import TiltCard from '@/components/TiltCard';
+import { useViewTransition } from '@/src/hooks/useViewTransition';
+import { haptic } from '@/src/utils/haptic';
 import {
   ArrowLeft, ArrowRight, Star, CheckCircle, Video, Search,
   Utensils, Home, Ship, Car, Heart, Wrench, Smartphone,
@@ -188,15 +190,15 @@ function CategoryFilters({ active, onChange, macroFilter }: { active: string; on
 }
 
 function StoreCard({ store, index }: { store: StoreForList; index: number }) {
-  const router = useRouter();
+  const { push } = useViewTransition();
   const href = `/pjazza/live-shop/${store.slug || store.id}`;
 
   return (
     <ScrollReveal delay={index * 40}>
-      <div
+      <TiltCard
         className="pj-card pj-card-store pj-touch"
         style={{ padding: 0, overflow: 'hidden', cursor: 'pointer' }}
-        onClick={() => router.push(href)}
+        onClick={() => { haptic('light'); push(href); }}
         data-testid={`card-store-${index}`}
       >
         <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
@@ -263,7 +265,7 @@ function StoreCard({ store, index }: { store: StoreForList; index: number }) {
           {store.liveNow ? (
             <button
               className="pj-btn-join"
-              onClick={(e) => { e.stopPropagation(); router.push(href); }}
+              onClick={(e) => { e.stopPropagation(); haptic('light'); push(href); }}
               data-testid={`button-shop-live-${index}`}
             >
               <Video size={14} strokeWidth={2} /> Join
@@ -271,20 +273,20 @@ function StoreCard({ store, index }: { store: StoreForList; index: number }) {
           ) : (
             <button
               className="pj-btn-call"
-              onClick={(e) => { e.stopPropagation(); router.push(href); }}
+              onClick={(e) => { e.stopPropagation(); haptic('light'); push(href); }}
               data-testid={`button-video-call-${index}`}
             >
               <Video size={14} strokeWidth={2} /> Call
             </button>
           )}
         </div>
-      </div>
+      </TiltCard>
     </ScrollReveal>
   );
 }
 
 function BottomCTA() {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   return (
     <div className="pj-section" style={{ textAlign: 'center' }}>
@@ -295,7 +297,7 @@ function BottomCTA() {
         <p style={{ fontSize: 'var(--pj-size-body)', color: 'var(--pj-text-tertiary)', marginBottom: 24, lineHeight: 1.6 }}>
           Go live and sell to all of Malta from your shop floor.
         </p>
-        <button className="pj-btn-primary" style={{ minWidth: 200, padding: '18px 24px', fontSize: 16 }} onClick={() => router.push('/pjazza/business/onboard')} data-testid="button-list-your-shop">
+        <button className="pj-btn-primary" style={{ minWidth: 200, padding: '18px 24px', fontSize: 16 }} onClick={() => { haptic('light'); push('/pjazza/business/onboard'); }} data-testid="button-list-your-shop">
           <span>List Your Shop</span>
           <ArrowRight size={18} strokeWidth={2.5} />
         </button>

@@ -1,7 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import TiltCard from '@/components/TiltCard';
+import { useViewTransition } from '@/src/hooks/useViewTransition';
+import { haptic } from '@/src/utils/haptic';
 import {
   Utensils, Home, Ship, Car, ShoppingBag, Wrench, Heart,
   Star, ChevronRight, Shield, CheckCircle, Eye, ArrowRight, Play,
@@ -43,7 +45,7 @@ function HeroSection({ liveCount }: { liveCount: number }) {
 }
 
 function QuickLinks() {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   return (
     <ScrollReveal>
@@ -52,7 +54,7 @@ function QuickLinks() {
           <button
             className="pj-btn-secondary pj-touch"
             style={{ flex: 1, justifyContent: 'center', gap: 6 }}
-            onClick={() => router.push('/pjazza/how-it-works')}
+            onClick={() => push('/pjazza/how-it-works')}
             data-testid="button-link-how"
           >
             <Info size={14} /> How It Works
@@ -60,7 +62,7 @@ function QuickLinks() {
           <button
             className="pj-btn-secondary pj-touch"
             style={{ flex: 1, justifyContent: 'center', gap: 6 }}
-            onClick={() => router.push('/pjazza/sectors')}
+            onClick={() => push('/pjazza/sectors')}
             data-testid="button-link-sectors"
           >
             <Grid3X3 size={14} /> All Sectors
@@ -72,7 +74,7 @@ function QuickLinks() {
 }
 
 function LiveNowSection({ streams }: { streams: StreamForList[] }) {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   return (
     <div className="pj-section">
@@ -86,7 +88,7 @@ function LiveNowSection({ streams }: { streams: StreamForList[] }) {
               Happening across Malta right now
             </p>
           </div>
-          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => router.push('/pjazza/live-shop')} data-testid="button-see-all-live">
+          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => push('/pjazza/live-shop')} data-testid="button-see-all-live">
             See all <ChevronRight size={14} />
           </button>
         </div>
@@ -95,17 +97,17 @@ function LiveNowSection({ streams }: { streams: StreamForList[] }) {
       <div className="pj-stream-grid">
         {streams.map((stream, i) => (
           <ScrollReveal key={i} delay={i * 60}>
-            <div
+            <TiltCard
               className="pj-card pj-touch"
-              style={{ width: 200, overflow: 'hidden' }}
-              onClick={() => stream.slug ? router.push(`/pjazza/live-shop/${stream.slug}`) : router.push('/pjazza/live-shop')}
+              style={{ width: 200, overflow: 'hidden', cursor: 'pointer' }}
+              onClick={() => { haptic('light'); stream.slug ? push(`/pjazza/live-shop/${stream.slug}`) : push('/pjazza/live-shop'); }}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && (stream.slug ? router.push(`/pjazza/live-shop/${stream.slug}`) : router.push('/pjazza/live-shop'))}
+              onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && (stream.slug ? push(`/pjazza/live-shop/${stream.slug}`) : push('/pjazza/live-shop'))}
               data-testid={`card-live-stream-${i}`}
             >
               <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
-                <img src={stream.img} alt={stream.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={stream.img} alt={stream.name} className="pj-card-img-zoom" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.6))' }} />
                 <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 'var(--pj-radius-pill)', background: 'var(--pj-red)', fontSize: 9, fontWeight: 700, color: 'white' }}>
                   <span className="pj-live-dot" style={{ background: 'white', width: 4, height: 4 }} />
@@ -137,7 +139,7 @@ function LiveNowSection({ streams }: { streams: StreamForList[] }) {
                   </span>
                 </div>
               </div>
-            </div>
+            </TiltCard>
           </ScrollReveal>
         ))}
       </div>
@@ -169,7 +171,7 @@ function SuccessStory() {
 }
 
 function CategorySection() {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   const categories = [
     { Icon: Utensils, label: 'Dining' },
@@ -193,7 +195,7 @@ function CategorySection() {
           <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', letterSpacing: '-0.01em' }}>
             Browse by category
           </h2>
-          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => router.push('/pjazza/sectors')} data-testid="button-all-categories">
+          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => push('/pjazza/sectors')} data-testid="button-all-categories">
             All <ChevronRight size={14} />
           </button>
         </div>
@@ -211,7 +213,7 @@ function CategorySection() {
 }
 
 function HowItWorks() {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   const steps = [
     { num: '01', title: 'Browse live streams', desc: 'Watch real businesses in action across all 12 sectors in Malta.' },
@@ -244,7 +246,7 @@ function HowItWorks() {
 
       <ScrollReveal delay={260}>
         <div style={{ marginTop: 16, textAlign: 'center' }}>
-          <button className="pj-btn-ghost" style={{ color: 'var(--pj-red)', gap: 6 }} onClick={() => router.push('/pjazza/how-it-works')} data-testid="button-learn-how-works">
+          <button className="pj-btn-ghost" style={{ color: 'var(--pj-red)', gap: 6 }} onClick={() => push('/pjazza/how-it-works')} data-testid="button-learn-how-works">
             Full guide <ArrowRight size={14} />
           </button>
         </div>
@@ -289,6 +291,8 @@ function TrustSection() {
 }
 
 function HighValueSection() {
+  const { push } = useViewTransition();
+
   const items = [
     { title: 'Sea View 2-Bed Apartment', location: 'Sliema', price: '€1,350/mo', img: thumbProperty, badge: 'Live Tour', sector: 'Property' },
     { title: '40ft Catamaran Charter', location: 'Grand Harbour', price: '€1,200/day', img: thumbYacht, badge: 'Live Tour', sector: 'Yacht' },
@@ -313,10 +317,10 @@ function HighValueSection() {
       <div className="pj-listing-grid">
         {items.map((item, i) => (
           <ScrollReveal key={i} delay={i * 80}>
-            <div className="pj-card pj-touch" style={{ overflow: 'hidden' }} data-testid={`card-listing-${i}`}>
+            <TiltCard className="pj-card pj-touch" style={{ overflow: 'hidden', cursor: 'pointer' }} onClick={() => { haptic('light'); push('/pjazza/discover'); }} data-testid={`card-listing-${i}`}>
               <div style={{ display: 'flex' }}>
-                <div style={{ width: 120, flexShrink: 0, position: 'relative' }}>
-                  <img src={item.img} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 100 }} />
+                <div style={{ width: 120, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+                  <img src={item.img} alt={item.title} className="pj-card-img-zoom" style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 100 }} />
                   <div style={{ position: 'absolute', top: 8, left: 8, fontSize: 8, fontWeight: 700, color: 'white', background: 'var(--pj-red)', padding: '2px 6px', borderRadius: 'var(--pj-radius-pill)', display: 'flex', alignItems: 'center', gap: 3 }}>
                     <span className="pj-live-dot" style={{ width: 4, height: 4, background: 'white' }} /> {item.badge}
                   </div>
@@ -328,7 +332,7 @@ function HighValueSection() {
                   <span className="pj-mono" style={{ fontSize: 'var(--pj-size-h3)', fontWeight: 800, color: 'var(--pj-text)' }}>{item.price}</span>
                 </div>
               </div>
-            </div>
+            </TiltCard>
           </ScrollReveal>
         ))}
       </div>

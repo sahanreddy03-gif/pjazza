@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
-/* Base document behavior */
+/* Base document behavior — premium smoothing */
 html {
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -10,6 +11,14 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Smooth scroll on iOS */
+@supports (-webkit-overflow-scrolling: touch) {
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* Hide scrollbars on WebKit browsers while preserving scrollability */
@@ -68,4 +77,85 @@ body {
 
 .stream-card-in {
   animation: stream-card-in 0.4s ease-out forwards;
+}
+
+/* ─── Make Everything Alive — Motion & Polish ───────────────────────────── */
+
+/* 1. Pulse-live: expanding ping ring behind LIVE dots */
+@keyframes pj-pulse-ping {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.pj-live-dot-ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: pj-pulse-ping 1.5s ease-out infinite;
+}
+
+.pj-live-dot-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pj-live-dot-core {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* 2. Fade-in-up: sections and cards enter from below */
+@keyframes pj-fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pj-animate-in {
+  animation: pj-fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 3. Float: subtle vertical bobbing for stats and trust badges */
+@keyframes pj-float {
+  0%, 100% { transform: translateY(-2px); }
+  50% { transform: translateY(2px); }
+}
+
+.pj-float {
+  animation: pj-float 4s ease-in-out infinite;
+}
+
+/* Page enter — subtle fade on navigation */
+@keyframes pj-page-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pj-page-enter {
+  min-height: 100%;
+}
+
+/* View Transitions API — cross-fade between pages */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root) {
+    animation: 0.25s ease-out both pj-vt-fade-out;
+  }
+  ::view-transition-new(root) {
+    animation: 0.35s ease-out 0.05s both pj-vt-fade-in;
+  }
+}
+
+@keyframes pj-vt-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes pj-vt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

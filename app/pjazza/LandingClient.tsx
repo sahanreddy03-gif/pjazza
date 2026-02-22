@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import {
   ArrowRight, Play, Eye, Star, CheckCircle, Shield,
   Utensils, Home, Ship, Car, Heart, Wrench,
@@ -10,6 +9,13 @@ import {
 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 import BrandMarquee from '@/components/BrandMarquee';
+import TiltCard from '@/components/TiltCard';
+import MagneticButton from '@/components/MagneticButton';
+import AmbientHero from '@/components/AmbientHero';
+import LiveCount from '@/components/LiveCount';
+import { useViewTransition } from '@/src/hooks/useViewTransition';
+import { useScrollProgress } from '@/src/hooks/useScrollProgress';
+import { haptic } from '@/src/utils/haptic';
 import type { StreamForList } from '@/src/lib/data';
 
 const heroImg = '/pjazza/images/hero-malta.jpg';
@@ -26,85 +32,89 @@ const imgChef = '/pjazza/images/people/chef.jpg';
 const imgHairstylist = '/pjazza/images/people/hairstylist.jpg';
 
 function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?: number }) {
-  const router = useRouter();
+  const { push } = useViewTransition();
+  const scrollProgress = useScrollProgress();
+  const parallaxY = scrollProgress * 40;
 
   return (
-    <div className="pj-image-wash" style={{ position: 'relative', minHeight: '75vh', display: 'flex', alignItems: 'flex-end' }}>
-      <Image
-        src={heroImg}
-        alt=""
-        fill
-        sizes="100vw"
-        priority
-        style={{ objectFit: 'cover', opacity: 0.45 }}
-      />
-      <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
-        <div className="pj-container" style={{ paddingBottom: 48, paddingTop: 80 }}>
-          <div className="pj-live-badge-lg" style={{ marginBottom: 20 }}>
-            <span className="pj-live-dot" style={{ width: 8, height: 8 }} />
-            <span>{liveCount} live now across Malta</span>
-          </div>
-          <h1
-            style={{
-              fontSize: 'var(--pj-size-hero)',
-              fontWeight: 800,
-              lineHeight: 0.95,
-              letterSpacing: '-0.03em',
-              color: 'var(--pj-text)',
-              marginBottom: 20,
-            }}
-          >
-            Watch it live.
-            <br />
-            Buy it
-            <br />
-            <span style={{ color: 'var(--pj-red)' }}>now.</span>
-          </h1>
-          <p
-            style={{
-              fontSize: 'var(--pj-size-h3)',
-              lineHeight: 1.5,
-              color: 'var(--pj-text-secondary)',
-              maxWidth: 440,
-              marginBottom: 16,
-            }}
-          >
-            Malta&apos;s live shopping marketplace. See every product, service, and property in real time before you buy.
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 36, fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>
-            <span><strong className="pj-mono" style={{ color: 'var(--pj-text)' }}>{businessCount ?? 60}+</strong> businesses</span>
-            <span>·</span>
-            <span><strong className="pj-mono" style={{ color: 'var(--pj-text)' }}>12</strong> sectors</span>
-            <span>·</span>
-            <span>Escrow protected</span>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, maxWidth: 440 }}>
-            <button
-              className="pj-btn-primary pj-touch"
-              style={{ flex: 1, minWidth: 180, padding: '18px 24px', fontSize: 16 }}
-              onClick={() => router.push('/pjazza/live-shop')}
-              data-testid="button-start-shopping"
+    <AmbientHero>
+      <div className="pj-image-wash" style={{ position: 'relative', minHeight: '75vh', display: 'flex', alignItems: 'flex-end' }}>
+        <Image
+          src={heroImg}
+          alt=""
+          fill
+          sizes="100vw"
+          priority
+          style={{ objectFit: 'cover', opacity: 0.45, transform: `translateY(${parallaxY * 0.15}px)` }}
+        />
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', transform: `translateY(${parallaxY * -0.08}px)` }}>
+          <div className="pj-container" style={{ paddingBottom: 48, paddingTop: 80 }}>
+            <div className="pj-live-badge-lg" style={{ marginBottom: 20 }}>
+              <span className="pj-live-dot" style={{ width: 8, height: 8 }} />
+              <span>{liveCount} live now across Malta</span>
+            </div>
+            <h1
+              style={{
+                fontSize: 'var(--pj-size-hero)',
+                fontWeight: 800,
+                lineHeight: 0.95,
+                letterSpacing: '-0.03em',
+                color: 'var(--pj-text)',
+                marginBottom: 20,
+              }}
             >
-              <Play size={16} fill="white" style={{ marginRight: 2 }} />
-              <span>Shop Live</span>
-            </button>
-            <button
-              className="pj-btn-secondary pj-touch"
-              style={{ flex: 1, minWidth: 160, padding: '16px 24px' }}
-              onClick={() => router.push('/pjazza/business/onboard')}
-              data-testid="button-sell-on-pjazza"
+              Watch it live.
+              <br />
+              Buy it
+              <br />
+              <span style={{ color: 'var(--pj-red)' }}>now.</span>
+            </h1>
+            <p
+              style={{
+                fontSize: 'var(--pj-size-h3)',
+                lineHeight: 1.5,
+                color: 'var(--pj-text-secondary)',
+                maxWidth: 440,
+                marginBottom: 16,
+              }}
             >
-              <span>Sell on PJAZZA</span>
-            </button>
+              Malta&apos;s live shopping marketplace. See every product, service, and property in real time before you buy.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 36, fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>
+              <span><strong className="pj-mono" style={{ color: 'var(--pj-text)' }}>{businessCount ?? 60}+</strong> businesses</span>
+              <span>·</span>
+              <span><strong className="pj-mono" style={{ color: 'var(--pj-text)' }}>12</strong> sectors</span>
+              <span>·</span>
+              <span>Escrow protected</span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, maxWidth: 440 }}>
+              <MagneticButton
+                className="pj-btn-primary pj-touch"
+                style={{ flex: 1, minWidth: 180, padding: '18px 24px', fontSize: 16 }}
+                onClick={() => { haptic('light'); push('/pjazza/live-shop'); }}
+                data-testid="button-start-shopping"
+              >
+                <Play size={16} fill="white" style={{ marginRight: 2 }} />
+                <span>Shop Live</span>
+              </MagneticButton>
+              <MagneticButton
+                className="pj-btn-secondary pj-touch"
+                style={{ flex: 1, minWidth: 160, padding: '16px 24px' }}
+                onClick={() => { haptic('light'); push('/pjazza/business/onboard'); }}
+                data-testid="button-sell-on-pjazza"
+              >
+                <span>Sell on PJAZZA</span>
+              </MagneticButton>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </AmbientHero>
   );
 }
 
 function LiveNowPreview({ streams }: { streams: StreamForList[] }) {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   return (
     <div className="pj-section">
@@ -121,7 +131,7 @@ function LiveNowPreview({ streams }: { streams: StreamForList[] }) {
               Watch, chat, and buy in real time
             </p>
           </div>
-          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => router.push('/pjazza/live-shop')} data-testid="button-see-all-live">
+          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => push('/pjazza/live-shop')} data-testid="button-see-all-live">
             See all <ChevronRight size={14} />
           </button>
         </div>
@@ -134,22 +144,22 @@ function LiveNowPreview({ streams }: { streams: StreamForList[] }) {
               <Video size={40} style={{ color: 'var(--pj-text-muted)', marginBottom: 12, display: 'block', margin: '0 auto 12px' }} />
               <p style={{ fontSize: 'var(--pj-size-body)', fontWeight: 600, color: 'var(--pj-text)', marginBottom: 4 }}>No live streams right now</p>
               <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', marginBottom: 16 }}>Check back soon — new streams go live daily</p>
-              <button className="pj-btn-secondary pj-touch" onClick={() => router.push('/pjazza/live-shop')}>Browse Live Shop</button>
+              <button className="pj-btn-secondary pj-touch" onClick={() => { haptic('light'); push('/pjazza/live-shop'); }}>Browse Live Shop</button>
             </div>
           </ScrollReveal>
         ) : streams.map((stream, i) => (
           <ScrollReveal key={i} delay={i * 60}>
-            <div
+            <TiltCard
               className="pj-card pj-touch"
               style={{ width: 200, overflow: 'hidden', cursor: 'pointer' }}
-              onClick={() => stream.slug ? router.push(`/pjazza/live-shop/${stream.slug}`) : router.push('/pjazza/live-shop')}
+              onClick={() => { haptic('light'); stream.slug ? push(`/pjazza/live-shop/${stream.slug}`) : push('/pjazza/live-shop'); }}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && (stream.slug ? router.push(`/pjazza/live-shop/${stream.slug}`) : router.push('/pjazza/live-shop'))}
+              onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && (stream.slug ? push(`/pjazza/live-shop/${stream.slug}`) : push('/pjazza/live-shop'))}
               data-testid={`card-live-stream-${i}`}
             >
               <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
-                <img src={stream.img} alt={stream.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={stream.img} alt={stream.name} className="pj-card-img-zoom" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.6))' }} />
                 <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 'var(--pj-radius-pill)', background: 'var(--pj-red)', fontSize: 11, fontWeight: 700, color: 'white' }}>
                   <span className="pj-live-dot" style={{ background: 'white', width: 5, height: 5 }} />
@@ -181,7 +191,7 @@ function LiveNowPreview({ streams }: { streams: StreamForList[] }) {
                   </span>
                 </div>
               </div>
-            </div>
+            </TiltCard>
           </ScrollReveal>
         ))}
       </div>
@@ -190,7 +200,7 @@ function LiveNowPreview({ streams }: { streams: StreamForList[] }) {
 }
 
 function AllSectors() {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   const sectors = [
     { Icon: Utensils, name: 'Food & Dining', color: 'var(--pj-red)' },
@@ -214,7 +224,7 @@ function AllSectors() {
           <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', letterSpacing: '-0.01em' }}>
             12 Sectors
           </h2>
-          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => router.push('/pjazza/sectors')} data-testid="button-all-sectors">
+          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => push('/pjazza/sectors')} data-testid="button-all-sectors">
             View all <ChevronRight size={14} />
           </button>
         </div>
@@ -226,7 +236,7 @@ function AllSectors() {
             <div
               className="pj-card pj-touch"
               style={{ padding: 16, height: '100%', cursor: 'pointer' }}
-              onClick={() => router.push('/pjazza/sectors')}
+              onClick={() => push('/pjazza/sectors')}
               data-testid={`card-sector-${s.name.toLowerCase().replace(/[^a-z]/g, '-')}`}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -257,7 +267,7 @@ function AllSectors() {
 }
 
 function FeaturedListings() {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   const listings = [
     { title: 'Sea View 2-Bed Apartment', location: 'Sliema', price: '€1,350/mo', img: thumbProperty, badge: 'Live Tour', sector: 'Property' },
@@ -273,7 +283,7 @@ function FeaturedListings() {
           <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', letterSpacing: '-0.01em' }}>
             Featured
           </h2>
-          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => router.push('/pjazza/discover')} data-testid="button-browse-listings">
+          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => push('/pjazza/discover')} data-testid="button-browse-listings">
             Browse <ChevronRight size={14} />
           </button>
         </div>
@@ -282,10 +292,10 @@ function FeaturedListings() {
       <div className="pj-listing-grid">
         {listings.map((item, i) => (
           <ScrollReveal key={i} delay={i * 60}>
-            <div className="pj-card pj-touch" style={{ overflow: 'hidden' }} data-testid={`card-listing-${i}`}>
+            <TiltCard className="pj-card pj-touch" style={{ overflow: 'hidden', cursor: 'pointer' }} onClick={() => { haptic('light'); push('/pjazza/discover'); }} data-testid={`card-listing-${i}`}>
               <div style={{ display: 'flex' }}>
-                <div style={{ width: 120, flexShrink: 0, position: 'relative' }}>
-                  <img src={item.img} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 110 }} />
+                <div style={{ width: 120, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+                  <img src={item.img} alt={item.title} className="pj-card-img-zoom" style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 110 }} />
                   <div style={{ position: 'absolute', top: 8, left: 8, fontSize: 10, fontWeight: 700, color: 'white', background: 'var(--pj-red)', padding: '3px 8px', borderRadius: 'var(--pj-radius-pill)', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span className="pj-live-dot" style={{ width: 5, height: 5, background: 'white' }} />
                     {item.badge}
@@ -298,7 +308,7 @@ function FeaturedListings() {
                   <span className="pj-mono" style={{ fontSize: 'var(--pj-size-h3)', fontWeight: 800, color: 'var(--pj-text)' }}>{item.price}</span>
                 </div>
               </div>
-            </div>
+            </TiltCard>
           </ScrollReveal>
         ))}
       </div>
@@ -307,7 +317,7 @@ function FeaturedListings() {
 }
 
 function HowItWorksPreview() {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   return (
     <div className="pj-section">
@@ -353,7 +363,7 @@ function HowItWorksPreview() {
           <button
             className="pj-btn-ghost"
             style={{ color: 'var(--pj-text-secondary)', gap: 6 }}
-            onClick={() => router.push('/pjazza/how-it-works')}
+            onClick={() => push('/pjazza/how-it-works')}
             data-testid="button-learn-more-how"
           >
             Learn more <ArrowRight size={14} />
@@ -370,19 +380,21 @@ function StatsBar({ businessCount = 60 }: { businessCount?: number }) {
       <div className="pj-section-tight" style={{ paddingTop: 0, paddingBottom: 0 }}>
         <div className="pj-stats-grid" style={{ gap: 1 }}>
           {[
-            { value: '2,400+', label: 'watching now' },
+            { value: <LiveCount target={2400} suffix="+" />, label: 'watching now' },
             { value: `${businessCount}+`, label: 'businesses' },
             { value: '12', label: 'sectors' },
             { value: 'Escrow', label: 'protected' },
           ].map((stat, i) => (
             <div
               key={i}
+              className="pj-float"
               style={{
                 textAlign: 'center',
                 padding: 18,
                 background: 'var(--pj-surface-1)',
                 borderRadius: i === 0 ? '12px 0 0 12px' : i === 3 ? '0 12px 12px 0' : '0',
                 borderLeft: i > 0 ? '1px solid var(--pj-border)' : 'none',
+                animationDelay: `${i * 0.15}s`,
               }}
               data-testid={`text-stat-${stat.label.replace(/\s/g, '-')}`}
             >
@@ -399,7 +411,7 @@ function StatsBar({ businessCount = 60 }: { businessCount?: number }) {
 }
 
 function PeoplePreview() {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   const featured = [
     { name: 'Mark Borg', role: 'Electrician', rating: 4.9, liveNow: true, topRated: true, img: imgElectrician },
@@ -417,7 +429,7 @@ function PeoplePreview() {
           <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', letterSpacing: '-0.01em' }}>
             Hire Anyone
           </h2>
-          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => router.push('/pjazza/people')} data-testid="button-all-people">
+          <button className="pj-btn-ghost" style={{ gap: 4 }} onClick={() => push('/pjazza/people')} data-testid="button-all-people">
             View all <ChevronRight size={14} />
           </button>
         </div>
@@ -429,7 +441,7 @@ function PeoplePreview() {
             <div
               className="pj-card pj-touch"
               style={{ width: 160, padding: 16, textAlign: 'center', cursor: 'pointer' }}
-              onClick={() => router.push('/pjazza/people')}
+              onClick={() => push('/pjazza/people')}
               data-testid={`card-person-preview-${i}`}
             >
               <div style={{ position: 'relative', display: 'inline-block', marginBottom: 10 }}>
@@ -510,7 +522,7 @@ function Testimonials() {
 }
 
 function B2BEnterprise() {
-  const router = useRouter();
+  const { push } = useViewTransition();
   return (
     <div className="pj-section" style={{ paddingTop: 48, paddingBottom: 48 }}>
       <ScrollReveal>
@@ -527,14 +539,14 @@ function B2BEnterprise() {
           <button
             className="pj-btn-primary"
             style={{ minWidth: 200, padding: '16px 24px' }}
-            onClick={() => router.push('/pjazza/contact')}
+            onClick={() => { haptic('light'); push('/pjazza/contact'); }}
           >
             <Briefcase size={18} style={{ marginRight: 8 }} />
             Get in touch
           </button>
           <button
             className="pj-btn-secondary"
-            onClick={() => router.push('/pjazza/how-it-works')}
+            onClick={() => push('/pjazza/how-it-works')}
           >
             See how it works
           </button>
@@ -545,7 +557,7 @@ function B2BEnterprise() {
 }
 
 function FinalCTA({ businessCount = 60 }: { businessCount?: number }) {
-  const router = useRouter();
+  const { push } = useViewTransition();
 
   return (
     <div className="pj-section" style={{ textAlign: 'center', paddingTop: 64, paddingBottom: 64 }}>
@@ -562,7 +574,7 @@ function FinalCTA({ businessCount = 60 }: { businessCount?: number }) {
           <button
             className="pj-btn-primary pj-touch"
             style={{ minWidth: 180, padding: '18px 24px', fontSize: 16 }}
-            onClick={() => router.push('/pjazza/live-shop')}
+            onClick={() => { haptic('light'); push('/pjazza/live-shop'); }}
             data-testid="button-explore-now"
           >
             <Play size={16} fill="white" style={{ marginRight: 2 }} />
@@ -571,7 +583,7 @@ function FinalCTA({ businessCount = 60 }: { businessCount?: number }) {
           <button
             className="pj-btn-secondary pj-touch"
             style={{ minWidth: 160, padding: '16px 24px' }}
-            onClick={() => router.push('/pjazza/business/onboard')}
+            onClick={() => { haptic('light'); push('/pjazza/business/onboard'); }}
             data-testid="button-list-business"
           >
             List Your Business
@@ -579,7 +591,7 @@ function FinalCTA({ businessCount = 60 }: { businessCount?: number }) {
           <button
             className="pj-btn-ghost pj-touch"
             style={{ minWidth: 140, padding: '14px 20px', fontSize: 14 }}
-            onClick={() => router.push('/pjazza/install')}
+            onClick={() => push('/pjazza/install')}
           >
             <Smartphone size={16} style={{ marginRight: 6 }} />
             Install app
@@ -600,7 +612,7 @@ function TrustLine() {
             { Icon: CheckCircle, text: 'Verified sellers' },
             { Icon: Video, text: 'Live video proof' },
           ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div key={i} className="pj-float" style={{ display: 'flex', alignItems: 'center', gap: 6, animationDelay: `${i * 0.2}s` }}>
               <item.Icon size={15} strokeWidth={2} style={{ color: 'var(--pj-green)' }} />
               <span style={{ fontSize: 'var(--pj-size-small)', fontWeight: 600, color: 'var(--pj-text-tertiary)' }}>{item.text}</span>
             </div>
