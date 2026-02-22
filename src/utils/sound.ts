@@ -42,6 +42,38 @@ export function soundClick() {
   osc.stop(ctx.currentTime + 0.08);
 }
 
+/** Play a warm welcome sound — AI-like “hello” hook on first interaction */
+export function soundWelcome() {
+  if (typeof window === 'undefined') return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const ctx = getContext();
+  if (!ctx) return;
+  unlock();
+
+  const gain = ctx.createGain();
+  gain.connect(ctx.destination);
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+
+  // Warm 3-note “welcome” motif: C5 → E5 → G5 (soft, inviting)
+  const notes = [523.25, 659.25, 783.99];
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const noteGain = ctx.createGain();
+    osc.connect(noteGain);
+    noteGain.connect(gain);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    const t = ctx.currentTime + i * 0.12;
+    noteGain.gain.setValueAtTime(0, t);
+    noteGain.gain.linearRampToValueAtTime(0.5, t + 0.03);
+    noteGain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    osc.start(t);
+    osc.stop(t + 0.4);
+  });
+}
+
 /** Play a soft hover tone (very subtle) */
 export function soundHover() {
   if (typeof window === 'undefined') return;
@@ -88,9 +120,12 @@ export function initSoundOnFirstInteraction() {
   if (unlocked) return;
   const handler = () => {
     unlock();
+    soundWelcome();
     document.removeEventListener('click', handler);
     document.removeEventListener('keydown', handler);
+    document.removeEventListener('touchstart', handler);
   };
   document.addEventListener('click', handler, { once: true });
   document.addEventListener('keydown', handler, { once: true });
+  document.addEventListener('touchstart', handler, { once: true });
 }
