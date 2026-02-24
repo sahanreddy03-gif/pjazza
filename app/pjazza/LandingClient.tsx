@@ -38,17 +38,24 @@ const imgChef = '/pjazza/images/people/chef.jpg';
 const imgHairstylist = '/pjazza/images/people/hairstylist.jpg';
 const heroVideo = '/pjazza/video/woman-live-stream-and-social-media-with-hands-ci-2025-12-17-14-25-07-utc.mov';
 
+// Dark poster so we never flash the ship/boat image — video goes straight to play
+const HERO_POSTER_DARK =
+  'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 1 1"><rect fill="%23000" width="1" height="1"/></svg>');
+
 function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?: number }) {
   const { push } = useViewTransition();
   const { heroRef, imgWrapRef, contentRef, wordsRef, subRef, ctasRef } = useHeroGSAP();
   const router = useRouter();
-  const [showVideo, setShowVideo] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [useVideo, setUseVideo] = useState(true);
+  const [useImage, setUseImage] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduceMotion) setShowVideo(true);
+    if (reduceMotion) {
+      setUseVideo(false);
+      setUseImage(true);
+    }
   }, []);
 
   // Prefetch key routes so first navigation feels instant
@@ -59,30 +66,23 @@ function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?:
     router.prefetch('/pjazza/business/dashboard');
   }, [router]);
 
-  useEffect(() => {
-    if (!showVideo) return;
-    const defer = window.requestIdleCallback
-      ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 2200 })
-      : (cb: () => void) => window.setTimeout(cb, 400);
-    defer(() => setVideoSrc(heroVideo));
-  }, [showVideo]);
-
   return (
     <AmbientHero>
       <div ref={heroRef} className="pj-image-wash pj-hero-gsap" style={{ position: 'relative', minHeight: '75vh', display: 'flex', alignItems: 'flex-end' }}>
-        <div ref={imgWrapRef} style={{ position: 'absolute', inset: 0 }}>
-          {showVideo ? (
+        <div ref={imgWrapRef} style={{ position: 'absolute', inset: 0, background: '#000' }}>
+          {useVideo && (
             <video
               src={heroVideo}
               autoPlay
               muted
               loop
               playsInline
-              preload="metadata"
-              poster={heroImg}
+              preload="auto"
+              poster={HERO_POSTER_DARK}
               style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
             />
-          ) : (
+          )}
+          {useImage && (
             <Image
               src={heroImg}
               alt=""
