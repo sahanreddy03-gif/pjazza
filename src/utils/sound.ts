@@ -36,8 +36,8 @@ export function soundClick() {
   osc.frequency.setValueAtTime(880, ctx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.03);
   osc.type = 'sine';
-  gain.gain.setValueAtTime(0.08, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.16, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
   osc.start(ctx.currentTime);
   osc.stop(ctx.currentTime + 0.08);
 }
@@ -53,7 +53,7 @@ export function soundWelcome() {
   const gain = ctx.createGain();
   gain.connect(ctx.destination);
   gain.gain.setValueAtTime(0, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+  gain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 0.02);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
 
   // Warm 3-note “welcome” motif: C5 → E5 → G5 (soft, inviting)
@@ -110,8 +110,8 @@ export function soundSuccess() {
   osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.06);
   osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.12);
   osc.type = 'sine';
-  gain.gain.setValueAtTime(0.06, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  gain.gain.setValueAtTime(0.14, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
   osc.start(ctx.currentTime);
   osc.stop(ctx.currentTime + 0.2);
 }

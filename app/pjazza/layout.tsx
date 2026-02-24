@@ -15,11 +15,13 @@ export const metadata = {
 };
 
 import Footer from '@/components/Footer';
+import PjazzaEnhancements from '@/components/PjazzaEnhancements';
 
 export default function PjazzaLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="pj-app pjazza-world" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <main style={{ flex: 1 }}>{children}</main>
+    <div className="pj-app pjazza-world" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
+      <PjazzaEnhancements />
+      <main style={{ flex: 1, position: 'relative', zIndex: 1 }}>{children}</main>
       <Footer />
     </div>
   );

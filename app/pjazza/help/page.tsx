@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowLeft, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import PjAppShell from '@/components/PjAppShell';
 
@@ -65,7 +66,7 @@ export default function HelpPage() {
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a href="tel:+35679711799" className="pj-btn-secondary" style={{ textDecoration: 'none', color: 'inherit' }}>Call +356 79711799</a>
-            <a href="/pjazza/contact" className="pj-btn-primary" style={{ textDecoration: 'none', color: 'white' }}>Contact form</a>
+            <Link href="/pjazza/contact" className="pj-btn-primary" style={{ textDecoration: 'none', color: 'white' }}>Contact form</Link>
           </div>
         </div>
       </div>

@@ -1,6 +1,9 @@
 'use client';
 
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ArrowRight, Play, Eye, Star, CheckCircle, Shield,
   Utensils, Home, Ship, Car, Heart, Wrench,
@@ -8,9 +11,6 @@ import {
   Users, Video, MessageSquare, ChevronRight, Briefcase, Quote
 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
-import BrandMarquee from '@/components/BrandMarquee';
-import FeaturedStack from '@/components/FeaturedStack';
-import HowItWorksPinned from '@/components/HowItWorksPinned';
 import TiltCard from '@/components/TiltCard';
 import MagneticButton from '@/components/MagneticButton';
 import AmbientHero from '@/components/AmbientHero';
@@ -19,6 +19,10 @@ import { useViewTransition } from '@/src/hooks/useViewTransition';
 import { useHeroGSAP } from '@/src/hooks/useHeroGSAP';
 import { haptic, ctaFeedback } from '@/src/utils/haptic';
 import type { StreamForList } from '@/src/lib/data';
+
+const BrandMarquee = dynamic(() => import('@/components/BrandMarquee'), { ssr: false });
+const FeaturedStack = dynamic(() => import('@/components/FeaturedStack'), { ssr: false });
+const HowItWorksPinned = dynamic(() => import('@/components/HowItWorksPinned'), { ssr: false });
 
 const heroImg = '/pjazza/images/hero-malta.jpg';
 const thumbProperty = '/pjazza/images/thumb-property.jpg';
@@ -32,23 +36,62 @@ const imgScuba = '/pjazza/images/people/scuba.jpg';
 const imgLawyer = '/pjazza/images/people/lawyer.jpg';
 const imgChef = '/pjazza/images/people/chef.jpg';
 const imgHairstylist = '/pjazza/images/people/hairstylist.jpg';
+const heroVideo = '/pjazza/video/woman-live-stream-and-social-media-with-hands-ci-2025-12-17-14-25-07-utc.mov';
 
 function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?: number }) {
   const { push } = useViewTransition();
   const { heroRef, imgWrapRef, contentRef, wordsRef, subRef, ctasRef } = useHeroGSAP();
+  const router = useRouter();
+  const [showVideo, setShowVideo] = useState(false);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) setShowVideo(true);
+  }, []);
+
+  // Prefetch key routes so first navigation feels instant
+  useEffect(() => {
+    router.prefetch('/pjazza/live-shop');
+    router.prefetch('/pjazza/discover');
+    router.prefetch('/pjazza/business/onboard');
+    router.prefetch('/pjazza/business/dashboard');
+  }, [router]);
+
+  useEffect(() => {
+    if (!showVideo) return;
+    const defer = window.requestIdleCallback
+      ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 2200 })
+      : (cb: () => void) => window.setTimeout(cb, 400);
+    defer(() => setVideoSrc(heroVideo));
+  }, [showVideo]);
 
   return (
     <AmbientHero>
       <div ref={heroRef} className="pj-image-wash pj-hero-gsap" style={{ position: 'relative', minHeight: '75vh', display: 'flex', alignItems: 'flex-end' }}>
         <div ref={imgWrapRef} style={{ position: 'absolute', inset: 0 }}>
-          <Image
-            src={heroImg}
-            alt=""
-            fill
-            sizes="100vw"
-            priority
-            style={{ objectFit: 'cover', opacity: 0.45 }}
-          />
+          {showVideo ? (
+            <video
+              src={heroVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={heroImg}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
+            />
+          ) : (
+            <Image
+              src={heroImg}
+              alt=""
+              fill
+              sizes="100vw"
+              priority
+              style={{ objectFit: 'cover', opacity: 0.45 }}
+            />
+          )}
         </div>
         <div ref={contentRef} style={{ position: 'relative', zIndex: 2, width: '100%' }}>
           <div className="pj-container" style={{ paddingBottom: 48, paddingTop: 80 }}>
@@ -76,8 +119,8 @@ function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?:
                 <span className="pj-hero-word">Buy</span>{' '}
                 <span className="pj-hero-word">it</span>
               </span>
-              <span style={{ display: 'block', color: 'var(--pj-red)' }}>
-                <span className="pj-hero-word">now.</span>
+              <span style={{ display: 'block' }}>
+                <span className="pj-hero-word pj-hero-accent">now.</span>
               </span>
             </h1>
             <p
@@ -118,6 +161,9 @@ function Hero({ liveCount, businessCount }: { liveCount: number; businessCount?:
                 <span>Sell on PJAZZA</span>
               </MagneticButton>
             </div>
+            <p style={{ marginTop: 16, fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>
+              Questions? <button type="button" onClick={() => push('/pjazza/contact')} className="pj-touch" style={{ background: 'none', border: 'none', color: 'var(--pj-red)', fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>Contact us</button> — we reply within 24 hours.
+            </p>
           </div>
         </div>
       </div>

@@ -93,7 +93,9 @@ export default function TopBar() {
               alignItems: 'center',
               justifyContent: 'center',
             }}
+            onClick={() => router.push('/pjazza/live-shop')}
             data-testid="button-search"
+            aria-label="Search stores"
           >
             <Search size={18} strokeWidth={2} />
           </button>
@@ -110,7 +112,9 @@ export default function TopBar() {
               justifyContent: 'center',
               position: 'relative',
             }}
+            onClick={() => router.push('/pjazza/help')}
             data-testid="button-notifications"
+            aria-label="Help & updates"
           >
             <Bell size={18} strokeWidth={2} />
             <span

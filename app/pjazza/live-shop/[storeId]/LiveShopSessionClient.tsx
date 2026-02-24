@@ -163,7 +163,10 @@ export default function LiveShopSessionClient({ store }: { store: StoreWithProdu
                 </button>
               </div>
               {liveCallError && (
-                <p style={{ fontSize: 12, color: 'var(--pj-red)', textAlign: 'center' }}>{liveCallError}</p>
+                <div style={{ textAlign: 'center', padding: '0 8px' }}>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.95)', marginBottom: 4 }}>Live connection isn’t available right now.</p>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>Browse products and chat below — or call {store.phone || 'the store'} to arrange a call.</p>
+                </div>
               )}
             </div>
           </>

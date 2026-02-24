@@ -15,6 +15,33 @@ export default function Footer() {
         marginTop: 'auto',
       }}
     >
+      {/* Prominent Contact CTA — trust & discoverability */}
+      <div
+        className="pj-card"
+        style={{
+          marginBottom: 24,
+          padding: 20,
+          borderColor: 'var(--pj-border-hover)',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+        }}
+      >
+        <div>
+          <p style={{ fontSize: 'var(--pj-size-body)', fontWeight: 700, color: 'var(--pj-text)', marginBottom: 4 }}>Need help or want to get in touch?</p>
+          <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>We reply within 24 hours. Business inquiries welcome.</p>
+        </div>
+        <Link
+          href="/pjazza/contact"
+          className="pj-btn-primary"
+          style={{ textDecoration: 'none', color: 'white', flexShrink: 0 }}
+        >
+          Contact us
+        </Link>
+      </div>
+
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img

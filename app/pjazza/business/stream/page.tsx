@@ -181,7 +181,6 @@ function UploadView({ onSaved }: { onSaved?: () => void }) {
     setUploadError('');
     try {
       const supabase = createClient();
-      const biz = businesses.find((b) => b.id === selectedBusiness);
       const ext = selectedFile.name.split('.').pop() || 'mp4';
       const path = `${selectedBusiness}/${Date.now()}.${ext}`;
 
@@ -190,7 +189,7 @@ function UploadView({ onSaved }: { onSaved?: () => void }) {
         .upload(path, selectedFile.file, { upsert: true });
 
       if (uploadErr) {
-        setUploadError(uploadErr.message || 'Upload failed');
+        setUploadError('Store publishing will be available after your business is verified. Save to Library below for now.');
         return;
       }
 
@@ -207,14 +206,14 @@ function UploadView({ onSaved }: { onSaved?: () => void }) {
       });
 
       if (insertErr) {
-        setUploadError(insertErr.message || 'Failed to publish');
+        setUploadError('Almost there — save to Library below. Store streams activate after verification.');
         return;
       }
 
       setSaved(true);
       setTimeout(() => onSaved?.(), 1500);
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+      setUploadError('Save to Library below to keep your video. Store publishing activates after verification.');
     } finally {
       setSaving(false);
     }
@@ -264,9 +263,12 @@ function UploadView({ onSaved }: { onSaved?: () => void }) {
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', fontSize: 'var(--pj-size-xs)', fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 8 }}><Store size={14} style={{ display: 'inline', marginRight: 4 }} /> Store (to show as stream)</label>
             <select value={selectedBusiness} onChange={(e) => setSelectedBusiness(e.target.value)} style={{ width: '100%', padding: '12px 14px', borderRadius: 'var(--pj-radius-md)', border: '1px solid var(--pj-border)', background: 'var(--pj-surface-1)', color: selectedBusiness ? 'var(--pj-text)' : 'var(--pj-text-tertiary)', fontSize: 'var(--pj-size-body)', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}>
-              <option value="">Select store</option>
+              <option value="">{businesses.length ? 'Select store' : 'No store yet — save to Library below'}</option>
               {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
+            {businesses.length === 0 && (
+              <p style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-text-tertiary)', marginTop: 6 }}>Claim or add your business in Dashboard first. Your video can still be saved to your library.</p>
+            )}
           </div>
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', fontSize: 'var(--pj-size-xs)', fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 8 }}><Type size={14} style={{ display: 'inline', marginRight: 4 }} /> Title</label>

@@ -36,6 +36,17 @@ const SECTOR_LABELS: Record<string, string> = {
   education: 'Education', pets: 'Pets', beauty: 'Beauty',
 };
 
+function OnboardHeader() {
+  const router = useRouter();
+  return (
+    <div style={{ padding: '16px var(--pj-section-padding, 24px) 0', marginBottom: 8 }}>
+      <button type="button" onClick={() => router.push('/pjazza')} className="pj-btn-ghost" style={{ gap: 6, padding: '4px 0' }} data-testid="button-back-to-pjazza">
+        ← Back to PJAZZA
+      </button>
+    </div>
+  );
+}
+
 function FindYourBusiness() {
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -441,6 +452,7 @@ function FinalCTA() {
 export default function BusinessOnboard() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
+      <OnboardHeader />
       <FindYourBusiness />
       <div className="pj-divider" />
       <PitchHero />

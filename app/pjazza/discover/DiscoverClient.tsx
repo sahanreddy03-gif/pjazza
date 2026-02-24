@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import TiltCard from '@/components/TiltCard';
 import { useViewTransition } from '@/src/hooks/useViewTransition';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { haptic } from '@/src/utils/haptic';
 import {
   Utensils, Home, Ship, Car, ShoppingBag, Wrench, Heart,
@@ -75,6 +77,15 @@ function QuickLinks() {
 
 function LiveNowSection({ streams }: { streams: StreamForList[] }) {
   const { push } = useViewTransition();
+  const router = useRouter();
+
+  // Prefetch Live Shop and first few store pages to speed up first click
+  useEffect(() => {
+    router.prefetch('/pjazza/live-shop');
+    streams.slice(0, 6).forEach((stream) => {
+      if (stream.slug) router.prefetch(`/pjazza/live-shop/${stream.slug}`);
+    });
+  }, [router, streams]);
 
   return (
     <div className="pj-section">

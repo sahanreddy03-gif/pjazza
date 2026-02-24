@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import TiltCard from '@/components/TiltCard';
 import { useViewTransition } from '@/src/hooks/useViewTransition';
 import { haptic, ctaFeedback } from '@/src/utils/haptic';
@@ -191,6 +192,7 @@ function CategoryFilters({ active, onChange, macroFilter }: { active: string; on
 
 function StoreCard({ store, index }: { store: StoreForList; index: number }) {
   const { push } = useViewTransition();
+  const router = useRouter();
   const href = `/pjazza/live-shop/${store.slug || store.id}`;
 
   return (
@@ -198,7 +200,8 @@ function StoreCard({ store, index }: { store: StoreForList; index: number }) {
       <TiltCard
         className="pj-card pj-card-store pj-card-glow pj-touch"
         style={{ padding: 0, overflow: 'hidden', cursor: 'pointer' }}
-        onClick={() => { haptic('light'); push(href); }}
+        onMouseEnter={() => router.prefetch(href)}
+        onClick={() => { ctaFeedback(); push(href); }}
         data-testid={`card-store-${index}`}
       >
         <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
@@ -264,8 +267,8 @@ function StoreCard({ store, index }: { store: StoreForList; index: number }) {
 
           {store.liveNow ? (
             <button
-              className="pj-btn-join"
-              onClick={(e) => { e.stopPropagation(); haptic('light'); push(href); }}
+              className="pj-btn-join pj-live-ring"
+              onClick={(e) => { e.stopPropagation(); ctaFeedback(); push(href); }}
               data-testid={`button-shop-live-${index}`}
             >
               <Video size={14} strokeWidth={2} /> Join
@@ -273,7 +276,7 @@ function StoreCard({ store, index }: { store: StoreForList; index: number }) {
           ) : (
             <button
               className="pj-btn-call"
-              onClick={(e) => { e.stopPropagation(); haptic('light'); push(href); }}
+              onClick={(e) => { e.stopPropagation(); ctaFeedback(); push(href); }}
               data-testid={`button-video-call-${index}`}
             >
               <Video size={14} strokeWidth={2} /> Call
