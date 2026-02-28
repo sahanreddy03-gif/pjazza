@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowRight, Search, CheckCircle, MapPin, Star,
   Utensils, Home, Ship, Car, Heart, Wrench,
@@ -18,6 +18,7 @@ type BusinessSearchResult = {
   slug: string;
   industry?: string;
   locality?: string;
+  owner_id?: string | null;
   cover_image_url?: string | null;
   logo_url?: string | null;
   image_urls?: string[] | null;
@@ -49,10 +50,41 @@ function OnboardHeader() {
 
 function FindYourBusiness() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const claimFromUrl = searchParams.get('claim');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<BusinessSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
+
+  const handleClaim = async (businessId: string) => {
+    setClaimError(null);
+    setClaimingId(businessId);
+    try {
+      const res = await fetch('/api/businesses/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ business_id: businessId }),
+      });
+      const data = await res.json();
+      if (res.status === 401) {
+        router.push(`/pjazza/agent?redirect=${encodeURIComponent(`/pjazza/business/onboard?claim=${businessId}`)}`);
+        return;
+      }
+      if (!res.ok) {
+        setClaimError(data?.error || 'Failed to claim');
+        return;
+      }
+      router.push('/pjazza/business/dashboard');
+      router.refresh();
+    } catch {
+      setClaimError('Failed to claim');
+    } finally {
+      setClaimingId(null);
+    }
+  };
 
   useEffect(() => {
     if (!query || query.length < 2) {
@@ -96,6 +128,11 @@ function FindYourBusiness() {
             style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--pj-text)', fontSize: 'var(--pj-size-body)', fontFamily: 'inherit', outline: 'none' }}
           />
         </div>
+        {claimError && (
+          <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-red)', marginBottom: 12, padding: 10, background: 'var(--pj-red-soft)', borderRadius: 8 }}>
+            {claimError}
+          </p>
+        )}
         {loading && <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-tertiary)' }}>Searching...</p>}
         {searched && query.length >= 2 && !loading && results.length === 0 && (
           <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>No match. List your business as new below.</p>
@@ -126,14 +163,19 @@ function FindYourBusiness() {
                   )}
                   {b.vibe_summary && <p style={{ fontSize: 11, color: 'var(--pj-text-secondary)', lineHeight: 1.4, fontStyle: 'italic' }}>{b.vibe_summary.slice(0, 80)}{b.vibe_summary.length > 80 ? '…' : ''}</p>}
                 </div>
-                <button
-                  className="pj-btn-primary"
-                  style={{ padding: '10px 18px', fontSize: 13, flexShrink: 0 }}
-                  onClick={(e) => { e.stopPropagation(); router.push(`/pjazza/business/dashboard?claim=${b.id}`); }}
-                  data-testid={`button-claim-${b.slug}`}
-                >
-                  Claim
-                </button>
+                {b.owner_id ? (
+                  <span style={{ fontSize: 12, color: 'var(--pj-text-tertiary)', padding: '10px 18px' }}>Claimed</span>
+                ) : (
+                  <button
+                    className="pj-btn-primary"
+                    style={{ padding: '10px 18px', fontSize: 13, flexShrink: 0 }}
+                    onClick={(e) => { e.stopPropagation(); handleClaim(b.id); }}
+                    disabled={claimingId === b.id}
+                    data-testid={`button-claim-${b.slug}`}
+                  >
+                    {claimingId === b.id ? 'Claiming…' : 'Claim'}
+                  </button>
+                )}
               </div>
             ))}
           </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AccessToken } from 'livekit-server-sdk';
+import { createClient } from '@/src/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_LIVEKIT_URL;
@@ -22,6 +23,30 @@ export async function POST(req: NextRequest) {
         { error: 'room and identity are required' },
         { status: 400 }
       );
+    }
+
+    // For store-* rooms: staff (owner) needs auth; customers can join for video calls
+    if (room.startsWith('store-') && identity.startsWith('staff-')) {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      const businessId = room.replace('store-', '');
+      const { data: biz } = await supabase
+        .from('businesses')
+        .select('id')
+        .eq('id', businessId)
+        .eq('owner_id', user.id)
+        .maybeSingle();
+      if (!biz) {
+        return NextResponse.json(
+          { error: 'You do not own this business' },
+          { status: 403 }
+        );
+      }
     }
 
     const at = new AccessToken(apiKey, apiSecret, {

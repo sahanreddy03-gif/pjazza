@@ -27,7 +27,20 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refresh session — do not add code between createServerClient and this call
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Protect /pjazza/business/* (except onboard) — redirect unauthenticated users to agent
+  const path = request.nextUrl.pathname;
+  const isBusinessRoute = path.startsWith("/pjazza/business");
+  const isOnboardRoute = path === "/pjazza/business/onboard" || path.startsWith("/pjazza/business/onboard/");
+
+  if (isBusinessRoute && !isOnboardRoute && !user) {
+    const url = new URL("/pjazza/agent", request.url);
+    url.searchParams.set("redirect", path);
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }

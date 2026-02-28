@@ -15,6 +15,7 @@ import {
   ProgressBar,
   TrustScore,
 } from "@/src/components/ui";
+import { BookingCard } from "@/src/components/consumer/BookingCard";
 
 async function getBusiness(slug: string): Promise<Business | null> {
   try {
@@ -30,6 +31,21 @@ async function getBusiness(slug: string): Promise<Business | null> {
     // Fall through to seed
   }
   return SEED_BUSINESSES.find((b) => b.slug === slug) ?? null;
+}
+
+async function getReviews(businessId: string): Promise<{ rating: number; text: string | null; created_at: string }[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("reviews")
+      .select("rating, text, created_at")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    return data ?? [];
+  } catch {
+    return [];
+  }
 }
 
 function crowdColor(pct: number) {
@@ -55,6 +71,7 @@ export default async function BizPage({
   if (!business) notFound();
 
   const trustScore = aggregateTrustScore(business);
+  const pjazzaReviews = await getReviews(business.id);
   const hasVibe =
     business.vibe &&
     Object.keys(business.vibe).length > 0 &&
@@ -106,6 +123,30 @@ export default async function BizPage({
         <h2 className="text-[15px] font-semibold text-ink mb-3">Trust Score</h2>
         <TrustScore data={trustScore} />
       </Card>
+
+      {/* PJAZZA Reviews */}
+      {pjazzaReviews.length > 0 && (
+        <Card>
+          <h2 className="text-[15px] font-semibold text-ink mb-3">PJAZZA Reviews</h2>
+          <div className="space-y-3">
+            {pjazzaReviews.map((r, i) => (
+              <div key={i} className="border-t border-line pt-3 first:border-t-0 first:pt-0">
+                <div className="flex gap-1 mb-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <span
+                      key={s}
+                      className={`text-sm ${s <= r.rating ? "text-warn" : "text-ink-muted"}`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                {r.text && <p className="text-xs text-ink-secondary">{r.text}</p>}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Vibe */}
       {hasVibe && business.vibe && (
@@ -164,12 +205,26 @@ export default async function BizPage({
         </div>
       )}
 
-      {/* Booking placeholder */}
-      <Card>
-        <p className="text-sm text-ink-muted text-center">
-          Booking coming next step
-        </p>
-      </Card>
+      {/* Connect live */}
+      {business.is_live && (
+        <Card>
+          <a
+            href={`/pjazza/live-shop/${business.slug}`}
+            className="flex items-center gap-3 py-3"
+          >
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-live/10 text-live">
+              <LivePulse className="scale-75" />
+              LIVE
+            </span>
+            <span className="text-sm font-semibold text-ink">
+              Connect live — video call {business.name}
+            </span>
+          </a>
+        </Card>
+      )}
+
+      {/* Book */}
+      <BookingCard business={business} />
     </div>
   );
 }

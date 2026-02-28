@@ -4,7 +4,7 @@ import Image from 'next/image';
 import TiltCard from '@/components/TiltCard';
 import { useViewTransition } from '@/src/hooks/useViewTransition';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { haptic } from '@/src/utils/haptic';
 import {
   Utensils, Home, Ship, Car, ShoppingBag, Wrench, Heart,
@@ -46,6 +46,31 @@ function HeroSection({ liveCount }: { liveCount: number }) {
   );
 }
 
+const TIERS = [
+  { id: 'all', label: 'All' },
+  { id: 'luxury', label: 'Luxury' },
+  { id: 'value', label: 'Value' },
+  { id: 'deals', label: 'Deals' },
+] as const;
+
+function TierSection({ tier, onTierChange }: { tier: string; onTierChange: (t: string) => void }) {
+  return (
+    <div className="pj-section-tight" style={{ paddingTop: 0, paddingBottom: 8 }}>
+      <div className="pj-scroll-x" style={{ gap: 8 }}>
+        {TIERS.map((t) => (
+          <button
+            key={t.id}
+            className={`pj-pill ${tier === t.id ? 'pj-pill-active' : ''}`}
+            onClick={() => onTierChange(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function QuickLinks() {
   const { push } = useViewTransition();
 
@@ -72,6 +97,54 @@ function QuickLinks() {
         </div>
       </div>
     </ScrollReveal>
+  );
+}
+
+function WatchAgainSection({ replays }: { replays: StreamForList[] }) {
+  const { push } = useViewTransition();
+  if (!replays.length) return null;
+  return (
+    <div className="pj-section">
+      <ScrollReveal>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div>
+            <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', letterSpacing: '-0.01em' }}>
+              Watch again
+            </h2>
+            <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-tertiary)', marginTop: 2 }}>
+              Past streams you can replay
+            </p>
+          </div>
+        </div>
+      </ScrollReveal>
+      <div className="pj-stream-grid">
+        {replays.slice(0, 6).map((s, i) => (
+          <ScrollReveal key={i} delay={i * 60}>
+            <TiltCard
+              className="pj-card pj-card-glow pj-touch"
+              style={{ width: 200, overflow: 'hidden', cursor: 'pointer' }}
+              onClick={() => { haptic('light'); push(`/pjazza/live-shop/${s.slug || s.businessId || 'live'}`); }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && push(`/pjazza/live-shop/${s.slug || s.businessId || 'live'}`)}
+            >
+              <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
+                {s.videoUrl ? (
+                  <video src={s.videoUrl} className="pj-card-img-zoom" style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', background: 'var(--pj-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Play size={32} style={{ color: 'var(--pj-text-tertiary)' }} />
+                  </div>
+                )}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 50%, rgba(0,0,0,0.7) 100%)', display: 'flex', alignItems: 'flex-end', padding: 12 }}>
+                  <span style={{ fontSize: 'var(--pj-size-micro)', fontWeight: 600, color: 'white' }}>{s.name}</span>
+                </div>
+              </div>
+            </TiltCard>
+          </ScrollReveal>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -398,13 +471,25 @@ function CrowdIntelligence() {
   );
 }
 
-export default function DiscoverClient({ initialStreams, liveCount }: { initialStreams: StreamForList[]; liveCount: number }) {
+export default function DiscoverClient({ initialStreams, liveCount, replays = [] }: { initialStreams: StreamForList[]; liveCount: number; replays?: StreamForList[] }) {
+  const [tier, setTier] = useState('all');
+  const [streams, setStreams] = useState<StreamForList[]>(initialStreams);
+
+  useEffect(() => {
+    fetch(`/api/streams?tier=${tier}`)
+      .then((r) => r.json())
+      .then((data: StreamForList[]) => setStreams(Array.isArray(data) && data.length > 0 ? data : initialStreams))
+      .catch(() => setStreams(initialStreams));
+  }, [tier, initialStreams]);
+
   return (
     <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
       <HeroSection liveCount={liveCount} />
       <QuickLinks />
-      <LiveNowSection streams={initialStreams} />
+      <TierSection tier={tier} onTierChange={setTier} />
+      <LiveNowSection streams={streams} />
+      <WatchAgainSection replays={replays} />
       <SuccessStory />
       <div className="pj-divider" />
       <CategorySection />

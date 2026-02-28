@@ -93,9 +93,9 @@ export default function TopBar() {
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            onClick={() => router.push('/pjazza/live-shop')}
+            onClick={() => router.push('/search')}
             data-testid="button-search"
-            aria-label="Search stores"
+            aria-label="Search"
           >
             <Search size={18} strokeWidth={2} />
           </button>

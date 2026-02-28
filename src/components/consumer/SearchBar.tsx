@@ -2,15 +2,24 @@
 
 /**
  * SearchBar — text input with magnifying glass icon
+ * Submits to /search?q=... on Enter (all sectors, verticals, branches)
  */
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function SearchBar() {
-  const [query, setQuery] = useState("");
+export function SearchBar({ defaultValue = "" }: { defaultValue?: string }) {
+  const [query, setQuery] = useState(defaultValue);
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (q) router.push(`/search?q=${encodeURIComponent(q)}`);
+  };
 
   return (
-    <div className="relative">
+    <form onSubmit={handleSubmit} className="relative">
       <span
         className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
         aria-hidden
@@ -19,12 +28,14 @@ export function SearchBar() {
       </span>
       <input
         type="search"
-        placeholder="Search anything..."
+        name="q"
+        placeholder="Search businesses, products, streams..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="w-full rounded-apple bg-white py-3.5 pl-11 pr-4 text-[15px] text-ink placeholder:text-ink-muted shadow-card border-0 focus:outline-none focus:ring-2 focus:ring-ink/20 transition-shadow"
+        aria-label="Search"
       />
-    </div>
+    </form>
   );
 }
 

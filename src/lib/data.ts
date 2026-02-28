@@ -379,6 +379,31 @@ export async function getStreamsWithReplays(): Promise<StreamForList[]> {
   return streams.length > 0 ? streams : getMockStreams();
 }
 
+/** Fetches past streams (replays) with video_url for Watch Again */
+export async function getReplays(): Promise<StreamForList[]> {
+  try {
+    const supabase = await createClient();
+    const { data: replays } = await supabase
+      .from("streams")
+      .select("*")
+      .not("video_url", "is", null)
+      .eq("is_live", false)
+      .order("created_at", { ascending: false })
+      .limit(8);
+    if (replays?.length) {
+      const bizIds = [...new Set(replays.map((s) => s.business_id).filter(Boolean))] as string[];
+      const { data: businesses } = bizIds.length > 0
+        ? await supabase.from("businesses").select("id, name, locality, industry, cover_image_url, slug").in("id", bizIds)
+        : { data: [] };
+      const bizMap = new Map((businesses || []).map((b: { id: string; name: string; locality: string; industry: string; cover_image_url: string | null; slug?: string }) => [b.id, b]));
+      return (replays as StreamRow[]).map((s) => streamToForList(s, s.business_id ? bizMap.get(s.business_id) : undefined));
+    }
+  } catch {
+    //
+  }
+  return [];
+}
+
 export async function getLiveBusinessCount(): Promise<number> {
   try {
     const supabase = await createClient();

@@ -5,6 +5,28 @@
 
 import type { CommissionConfig, IndustryType } from "@/src/types";
 
+/** Map DB industry values to commission config keys */
+export const INDUSTRY_TO_CONFIG: Record<string, IndustryType> = {
+  food: "dining",
+  dining: "dining",
+  property: "realestate",
+  realestate: "realestate",
+  yachts: "yacht",
+  yacht: "yacht",
+  cars: "cars",
+  "home-services": "freelancer",
+  freelancer: "freelancer",
+  fashion: "retail",
+  retail: "retail",
+  electronics: "retail",
+  wellness: "beauty",
+  beauty: "beauty",
+  tourism: "tours",
+  tours: "tours",
+  education: "tours",
+  pets: "retail",
+};
+
 export const COMMISSION_RATES: Record<IndustryType, CommissionConfig> = {
   dining: { rate: 0.08, minTransaction: 20, cap: null },
   realestate: {

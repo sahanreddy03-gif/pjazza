@@ -1,21 +1,25 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Eye, DollarSign, Star, Video, TrendingUp,
   Ship, MessageSquare, Clock,
   ChevronRight, Calendar,
-  Radio, Upload
+  Radio, Upload, CreditCard, Loader2, CheckCircle, Package, Settings
 } from 'lucide-react';
 import PjAppShell from '@/components/PjAppShell';
 import ScrollReveal from '@/components/ScrollReveal';
+import { createClient } from '@/src/lib/supabase/client';
 
-function QuickStats() {
+type BusinessRow = { id: string; name: string; locality?: string | null; stripe_account_id?: string | null; subscription?: string | null; streaming_streak?: number | null };
+
+function QuickStats({ revenueMonth, pendingCount, streak, avgResponse }: { revenueMonth: number; pendingCount: number; streak?: number; avgResponse?: number | null }) {
   const stats = [
-    { value: '€2,340', label: 'This month', Icon: DollarSign, color: 'var(--pj-green)' },
-    { value: '1,847', label: 'Total views', Icon: Eye, color: 'var(--pj-text-secondary)' },
-    { value: '4.8', label: 'Rating', Icon: Star, color: 'var(--pj-gold)' },
-    { value: '23', label: 'Streams', Icon: Video, color: 'var(--pj-red)' },
+    { value: `€${revenueMonth.toFixed(0)}`, label: 'This month', Icon: DollarSign, color: 'var(--pj-green)' },
+    { value: String(pendingCount), label: 'Pending bookings', Icon: MessageSquare, color: 'var(--pj-text-secondary)' },
+    { value: streak !== undefined ? String(streak) : '—', label: 'Stream streak', Icon: Radio, color: 'var(--pj-gold)' },
+    { value: avgResponse != null ? `${avgResponse}m` : '—', label: 'Avg response', Icon: Clock, color: 'var(--pj-text-tertiary)' },
   ];
 
   return (
@@ -43,6 +47,82 @@ function QuickStats() {
   );
 }
 
+function ConnectStripeSection({ businesses }: { businesses: BusinessRow[] }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const stripeStatus = searchParams.get('stripe');
+  const [connectingId, setConnectingId] = useState<string | null>(null);
+
+  const needsConnect = businesses.filter((b) => !b.stripe_account_id);
+  const hasComplete = stripeStatus === 'complete';
+
+  const handleConnect = async (businessId: string) => {
+    setConnectingId(businessId);
+    try {
+      const res = await fetch('/api/stripe/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ business_id: businessId }),
+      });
+      const data = await res.json();
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        setConnectingId(null);
+      }
+    } catch {
+      setConnectingId(null);
+    }
+  };
+
+  if (needsConnect.length === 0) return null;
+
+  return (
+    <ScrollReveal delay={80}>
+      <div
+        className="pj-card"
+        style={{
+          padding: 16,
+          borderColor: 'var(--pj-green-border, var(--pj-border))',
+          background: 'var(--pj-green-soft, var(--pj-surface-1))',
+        }}
+      >
+        {hasComplete && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, color: 'var(--pj-green)' }}>
+            <CheckCircle size={18} />
+            <span style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700 }}>Stripe connected</span>
+          </div>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <CreditCard size={18} style={{ color: 'var(--pj-text-tertiary)' }} />
+          <span style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700, color: 'var(--pj-text)' }}>
+            Set up payments
+          </span>
+        </div>
+        <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
+          Connect Stripe to accept payments from customers. Required before going live.
+        </p>
+        {needsConnect.map((b) => (
+          <button
+            key={b.id}
+            className="pj-btn-primary"
+            style={{ width: '100%', padding: 14, fontSize: 14, marginBottom: 8 }}
+            onClick={() => handleConnect(b.id)}
+            disabled={connectingId === b.id}
+          >
+            {connectingId === b.id ? (
+              <Loader2 size={18} className="animate-spin" style={{ marginRight: 8 }} />
+            ) : (
+              <CreditCard size={18} style={{ marginRight: 8 }} />
+            )}
+            Connect Stripe · {b.name}
+          </button>
+        ))}
+      </div>
+    </ScrollReveal>
+  );
+}
+
 function GoLiveButton() {
   const router = useRouter();
 
@@ -63,7 +143,27 @@ function GoLiveButton() {
   );
 }
 
+type CruiseArrival = { ship_name: string; port: string; arrival_at: string; passenger_count: number | null; best_live_start: string | null; best_live_end: string | null };
+
 function CruiseShipAlert() {
+  const [cruises, setCruises] = useState<CruiseArrival[]>([]);
+
+  useEffect(() => {
+    fetch('/api/cruise-arrivals')
+      .then((r) => r.json())
+      .then((d: CruiseArrival[]) => setCruises(d ?? []))
+      .catch(() => setCruises([]));
+  }, []);
+
+  const cruise = cruises[0];
+  if (!cruise) return null;
+
+  const arr = new Date(cruise.arrival_at);
+  const start = cruise.best_live_start ? new Date(cruise.best_live_start) : null;
+  const end = cruise.best_live_end ? new Date(cruise.best_live_end) : null;
+  const arrivalStr = arr.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + arr.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const bestTimeStr = start && end ? `${start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : null;
+
   return (
     <ScrollReveal delay={100}>
       <div
@@ -91,18 +191,20 @@ function CruiseShipAlert() {
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
               <span style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700, color: 'var(--pj-text)' }}>
-                MSC Grandiosa arriving
+                {cruise.ship_name} arriving
               </span>
             </div>
             <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-tertiary)', marginBottom: 8 }}>
-              Tomorrow 8:00 AM · 4,842 passengers · Grand Harbour
+              {arrivalStr} · {cruise.passenger_count?.toLocaleString() ?? '—'} passengers · {cruise.port}
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <TrendingUp size={12} style={{ color: 'var(--pj-green)' }} />
-              <span style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-green)', fontWeight: 600 }}>
-                Best time to go live: 9:30 - 11:00 AM
-              </span>
-            </div>
+            {bestTimeStr && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <TrendingUp size={12} style={{ color: 'var(--pj-green)' }} />
+                <span style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-green)', fontWeight: 600 }}>
+                  Best time to go live: {bestTimeStr}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -163,76 +265,121 @@ function RevenueChart() {
   );
 }
 
-function RecentRequests() {
-  const requests = [
-    { name: 'Sarah M.', message: 'Can I see the back garden?', time: '2m ago', type: 'Property Tour' },
-    { name: 'Marco D.', message: 'Is the veal scallopini available tonight?', time: '8m ago', type: 'Booking' },
-    { name: 'James K.', message: 'Schedule a live walkaround?', time: '1h ago', type: 'Car Viewing' },
-  ];
+type Booking = { id: string; amount: number; status: string; booking_type: string; date: string | null; time: string | null; guests: number | null; seller_photo_url?: string | null; created_at: string };
+
+function IncomingBookings({ bookings, businessId }: { bookings: Booking[]; businessId: string }) {
+  const [capturing, setCapturing] = useState<string | null>(null);
+  const [addingProof, setAddingProof] = useState<string | null>(null);
+  const [proofUrl, setProofUrl] = useState("");
+
+  const needsProof = (r: Booking) => ["product", "service"].includes(r.booking_type ?? "");
+  const handleCapture = async (bookingId: string) => {
+    setCapturing(bookingId);
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/capture`, { method: 'POST' });
+      if (res.ok) window.location.reload();
+    } finally {
+      setCapturing(null);
+    }
+  };
+
+  const handleAddProof = async (bookingId: string) => {
+    if (!proofUrl.trim()) return;
+    setAddingProof(bookingId);
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seller_photo_url: proofUrl.trim() }),
+      });
+      if (res.ok) { setAddingProof(null); setProofUrl(""); window.location.reload(); }
+    } finally {
+      setAddingProof(null);
+    }
+  };
 
   return (
     <ScrollReveal>
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <MessageSquare size={14} style={{ color: 'var(--pj-text-tertiary)' }} />
-            <span style={{ fontSize: 'var(--pj-size-h3)', fontWeight: 700, color: 'var(--pj-text)' }}>
-              Recent requests
-            </span>
-          </div>
-          <button className="pj-btn-ghost" style={{ gap: 4 }} data-testid="button-all-requests">
-            All <ChevronRight size={14} />
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <MessageSquare size={14} style={{ color: 'var(--pj-text-tertiary)' }} />
+          <span style={{ fontSize: 'var(--pj-size-h3)', fontWeight: 700, color: 'var(--pj-text)' }}>
+            Incoming bookings
+          </span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {requests.map((r, i) => (
+          {bookings.length === 0 ? (
+            <div className="pj-card" style={{ padding: 20, textAlign: 'center' }}>
+              <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>No bookings yet</p>
+            </div>
+          ) : (
+            bookings.slice(0, 5).map((r) => (
             <div
-              key={i}
-              className="pj-card pj-touch"
-              style={{ padding: 14, display: 'flex', alignItems: 'center', gap: 12 }}
-              data-testid={`card-request-${i}`}
+              key={r.id}
+              className="pj-card"
+              style={{ padding: 14, display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}
             >
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '50%',
-                  background: 'var(--pj-surface-3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  fontSize: 'var(--pj-size-small)',
-                  fontWeight: 700,
-                  color: 'var(--pj-text-secondary)',
-                }}
-              >
-                {r.name.charAt(0)}
-              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                  <span style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700, color: 'var(--pj-text)' }}>
-                    {r.name}
+                  <span className="pj-mono" style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700, color: 'var(--pj-text)' }}>
+                    €{Number(r.amount).toFixed(2)}
                   </span>
                   <span style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-text-tertiary)' }}>
-                    {r.time}
+                    {r.date ?? r.created_at.slice(0, 10)}
                   </span>
                 </div>
-                <p
-                  style={{
-                    fontSize: 'var(--pj-size-xs)',
-                    color: 'var(--pj-text-secondary)',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {r.message}
+                <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-secondary)' }}>
+                  {r.booking_type} · {r.status}
+                  {r.guests ? ` · ${r.guests} guests` : ''}
                 </p>
               </div>
+              {r.status === 'pending' && (
+                needsProof(r) ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {r.seller_photo_url ? (
+                      <span style={{ fontSize: 11, color: 'var(--pj-text-tertiary)' }}>Waiting for consumer approval</span>
+                    ) : addingProof === r.id ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <input
+                          type="url"
+                          placeholder="Photo proof URL"
+                          value={proofUrl}
+                          onChange={(e) => setProofUrl(e.target.value)}
+                          style={{ width: '100%', padding: 8, fontSize: 12 }}
+                        />
+                        <button
+                          className="pj-btn-primary"
+                          style={{ padding: '6px 12px', fontSize: 12 }}
+                          onClick={() => handleAddProof(r.id)}
+                          disabled={!proofUrl.trim()}
+                        >
+                          Save proof
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className="pj-btn-secondary"
+                        style={{ padding: '8px 14px', fontSize: 13 }}
+                        onClick={() => setAddingProof(r.id)}
+                      >
+                        Add proof
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    className="pj-btn-primary"
+                    style={{ padding: '8px 14px', fontSize: 13 }}
+                    onClick={() => handleCapture(r.id)}
+                    disabled={capturing === r.id}
+                  >
+                    {capturing === r.id ? '...' : 'Capture'}
+                  </button>
+                )
+              )}
             </div>
-          ))}
+          )))}
         </div>
       </div>
     </ScrollReveal>
@@ -277,6 +424,57 @@ function UpcomingStreams() {
 
 export default function BusinessDashboard() {
   const router = useRouter();
+  const [businesses, setBusinesses] = useState<BusinessRow[]>([]);
+  const [businessName, setBusinessName] = useState<string>('');
+  const [businessLocality, setBusinessLocality] = useState<string>('');
+  const [loaded, setLoaded] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [revenueMonth, setRevenueMonth] = useState(0);
+  const [streak, setStreak] = useState<number | undefined>();
+  const [avgResponse, setAvgResponse] = useState<number | null | undefined>();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        setLoaded(true);
+        return;
+      }
+      supabase
+        .from('businesses')
+        .select('id, name, locality, stripe_account_id, subscription, streaming_streak')
+        .eq('owner_id', user.id)
+        .then(({ data }) => {
+          setBusinesses(data ?? []);
+          const first = (data ?? [])[0];
+          if (first) {
+            setBusinessName(first.name);
+            setBusinessLocality(first.locality ?? '');
+            fetch(`/api/bookings?business_id=${first.id}`)
+              .then((r) => r.json())
+              .then((b: Booking[]) => {
+                setBookings(b ?? []);
+                const now = new Date();
+                const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                const thisMonth = (b ?? []).filter(
+                  (x: Booking) => x.status === 'completed' && (x.created_at || '').startsWith(monthStr)
+                );
+                setRevenueMonth(thisMonth.reduce((s, x) => s + Number(x.amount), 0));
+              })
+              .catch(() => {});
+            fetch(`/api/businesses/${first.id}/stats`)
+              .then((r) => r.json())
+              .then((d) => {
+                setStreak(d.streaming_streak ?? 0);
+                setAvgResponse(d.avg_response_minutes ?? null);
+              })
+              .catch(() => {});
+          }
+          setLoaded(true);
+        });
+    });
+  }, []);
+
   return (
     <PjAppShell>
     <div className="pj-safe-bottom" style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
@@ -301,15 +499,26 @@ export default function BusinessDashboard() {
             </div>
           </div>
           <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)' }}>
-            Noni&apos;s Kitchen · Sliema
+            {businessName ? `${businessName}${businessLocality ? ` · ${businessLocality}` : ''}` : 'Claim a business to get started'}
           </p>
+          {loaded && !businessName && businesses.length === 0 && (
+            <a
+              href="/pjazza/business/onboard"
+              className="pj-btn-primary"
+              style={{ display: 'inline-flex', marginTop: 12, padding: '10px 18px', fontSize: 14, textDecoration: 'none', color: 'white', alignItems: 'center', gap: 8 }}
+            >
+              Claim your business
+              <ChevronRight size={16} />
+            </a>
+          )}
         </ScrollReveal>
       </div>
 
       <div className="pj-section" style={{ paddingTop: 20, paddingBottom: 20 }}>
-        <QuickStats />
+        <QuickStats revenueMonth={revenueMonth} pendingCount={bookings.filter((b) => b.status === 'pending').length} streak={streak} avgResponse={avgResponse} />
 
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <ConnectStripeSection businesses={businesses} />
           <GoLiveButton />
           <button
             className="pj-btn-primary pj-touch"
@@ -329,6 +538,30 @@ export default function BusinessDashboard() {
           >
             <Video size={18} style={{ marginRight: 8 }} />
             Accept live video calls
+          </button>
+          <button
+            className="pj-btn-ghost"
+            style={{ width: '100%', padding: '16px 24px', fontSize: 15, justifyContent: 'flex-start', textAlign: 'left' }}
+            onClick={() => router.push('/pjazza/business/products')}
+          >
+            <Package size={18} style={{ marginRight: 8, flexShrink: 0 }} />
+            Manage products
+          </button>
+          <button
+            className="pj-btn-ghost"
+            style={{ width: '100%', padding: '16px 24px', fontSize: 15, justifyContent: 'flex-start', textAlign: 'left' }}
+            onClick={() => router.push('/pjazza/business/subscription')}
+          >
+            <CreditCard size={18} style={{ marginRight: 8, flexShrink: 0 }} />
+            Subscription
+          </button>
+          <button
+            className="pj-btn-ghost"
+            style={{ width: '100%', padding: '16px 24px', fontSize: 15, justifyContent: 'flex-start', textAlign: 'left' }}
+            onClick={() => router.push('/pjazza/business/settings')}
+          >
+            <Settings size={18} style={{ marginRight: 8, flexShrink: 0 }} />
+            Business settings
           </button>
           <a
             href="/pjazza/agent"
@@ -351,7 +584,7 @@ export default function BusinessDashboard() {
             <RevenueChart />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <RecentRequests />
+            <IncomingBookings bookings={bookings} businessId={businesses[0]?.id ?? ''} />
             <UpcomingStreams />
           </div>
         </div>

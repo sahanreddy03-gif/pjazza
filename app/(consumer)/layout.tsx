@@ -26,26 +26,31 @@ export default function ConsumerLayout({
 
   return (
     <div className="min-h-screen flex flex-col w-full max-w-[420px] md:max-w-2xl lg:max-w-4xl mx-auto bg-surface">
-      <header className="sticky top-0 z-50 flex items-center justify-between gap-3 px-5 py-3 bg-white/80 backdrop-blur-xl border-b border-line/50">
-        <Link href="/" className="flex items-center">
-          <img
-            src="/pjazza/images/logo-black.svg"
-            alt="PJAZZA"
-            className="h-6 w-auto"
-          />
-        </Link>
+<header className="sticky top-0 z-50 flex items-center justify-between gap-3 px-5 py-3 bg-white/80 backdrop-blur-xl border-b border-line/50">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center" aria-label="Home">
+            <img
+              src="/pjazza/images/logo-black.svg"
+              alt="PJAZZA"
+              className="h-6 w-auto"
+            />
+          </Link>
+          <Link href="/pjazza" className="text-[11px] font-medium text-ink-muted hover:text-ink transition-colors">
+            For businesses
+          </Link>
+        </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-live/10 text-live">
             <LivePulse className="scale-75" />
             12 LIVE
           </span>
-          <button
-            type="button"
+          <Link
+            href="/search"
             aria-label="Search"
             className="p-2 rounded-full hover:bg-surface-alt transition-colors"
           >
             <SearchIcon />
-          </button>
+          </Link>
           <button
             type="button"
             aria-label="Notifications"

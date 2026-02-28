@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { X, CreditCard, CheckCircle, Loader2, Shield } from 'lucide-react';
+import { CurrencyConverter } from '@/src/components/CurrencyConverter';
 
 interface CheckoutModalProps {
   open: boolean;
@@ -134,11 +135,14 @@ export default function CheckoutModal({ open, onClose, total, storeName, itemCou
                   />
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span style={{ fontSize: 'var(--pj-size-body)', color: 'var(--pj-text-tertiary)' }}>Total</span>
                 <span className="pj-mono" style={{ fontSize: 22, fontWeight: 800, color: 'var(--pj-text)' }}>
                   {total.toLocaleString('en', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
                 </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
+                <CurrencyConverter amountEur={total} showLabel={false} className="text-xs text-ink-muted" />
               </div>
               <button type="submit" className="pj-btn-primary" style={{ width: '100%', padding: '18px 24px', fontSize: 16 }}>
                 <CreditCard size={18} />

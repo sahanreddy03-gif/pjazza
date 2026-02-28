@@ -17,6 +17,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/pjazza/how-it-works`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
     { url: `${base}/pjazza/sectors`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.85 },
     { url: `${base}/pjazza/people`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${base}/pjazza/community`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${base}/pjazza/magazine`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${base}/pjazza/business/onboard`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/pjazza/help`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/pjazza/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },

@@ -6,7 +6,7 @@ export const SITE = {
   name: 'PJAZZA',
   tagline: "by Maltaverse",
   description: "Malta's live shopping marketplace. Watch it live. Buy it now. Video call any store, shop experiences and products in real time.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://maltaverse.live',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.maltaverse.live',
   locale: 'en_MT',
   region: 'Malta',
   keywords: [

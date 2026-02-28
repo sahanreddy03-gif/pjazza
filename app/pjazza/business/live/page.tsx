@@ -18,7 +18,7 @@ export default function BusinessLivePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/api/businesses')
+    fetch('/api/businesses?mine=1')
       .then((r) => r.json())
       .then((data: Business[]) => setBusinesses(data))
       .catch(() => setBusinesses([]));
@@ -102,6 +102,12 @@ export default function BusinessLivePage() {
         <p style={{ fontSize: 14, color: 'var(--pj-text-tertiary)', marginBottom: 24 }}>
           Open this page in a browser. When a customer taps &quot;Connect live&quot; in the app, you&apos;ll see them here. No software to install.
         </p>
+
+        {businesses.length === 0 && (
+          <p style={{ fontSize: 14, color: 'var(--pj-text-secondary)', marginBottom: 24, padding: 16, background: 'var(--pj-surface-1)', borderRadius: 8 }}>
+            Claim a business in <a href="/pjazza/business/onboard" style={{ color: 'var(--pj-red)', textDecoration: 'underline' }}>onboarding</a> to go live.
+          </p>
+        )}
 
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 8 }}>
           <Store size={14} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />

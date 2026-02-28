@@ -15,13 +15,14 @@ export default function LegalIndex() {
 
   return (
     <div className="pj-section" style={{ paddingTop: 60, minHeight: '80vh' }}>
-      <button
-        className="pj-btn-ghost"
-        style={{ marginBottom: 24, gap: 6 }}
-        onClick={() => router.back()}
-      >
-        <ArrowLeft size={16} /> Back
-      </button>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+        <button className="pj-btn-ghost" style={{ gap: 6 }} onClick={() => router.back()}>
+          <ArrowLeft size={16} /> Back
+        </button>
+        <Link href="/pjazza/discover" className="pj-btn-ghost" style={{ gap: 6, textDecoration: 'none', color: 'inherit' }}>
+          Home
+        </Link>
+      </div>
       <h1 style={{ fontSize: 'var(--pj-size-h1)', fontWeight: 800, color: 'var(--pj-text)', marginBottom: 8 }}>
         Legal
       </h1>

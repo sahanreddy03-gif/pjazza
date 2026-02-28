@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SITE } from "@/src/lib/site";
+import { PostHogProvider } from "@/src/components/providers/PostHogProvider";
+import { PWAInstallPrompt } from "@/src/components/PWAInstallPrompt";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -122,10 +124,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-surface text-ink antialiased font-sans">
-        <JsonLd />
-        <div className="min-h-screen w-full">
-          {children}
-        </div>
+        <PostHogProvider>
+          <JsonLd />
+          <div className="min-h-screen w-full">{children}</div>
+          <PWAInstallPrompt />
+        </PostHogProvider>
       </body>
     </html>
   );

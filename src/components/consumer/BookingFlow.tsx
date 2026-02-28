@@ -9,16 +9,27 @@ import type { Business } from "@/src/types";
 import type { BookingType } from "@/src/types";
 import { Button } from "@/src/components/ui";
 import { PaymentForm } from "./PaymentForm";
+import { calculateDelivery, type DeliveryMethod } from "@/src/config/commissions";
 
 const INDUSTRY_TO_BOOKING_TYPE: Partial<Record<string, BookingType>> = {
   dining: "table",
+  food: "table",
   tours: "tour",
+  tourism: "tour",
   realestate: "property_viewing",
+  property: "property_viewing",
   yacht: "tour",
+  yachts: "tour",
   cars: "property_viewing",
   freelancer: "service",
+  "home-services": "service",
   retail: "product",
+  fashion: "product",
+  electronics: "product",
   beauty: "service",
+  wellness: "service",
+  education: "tour",
+  pets: "product",
 };
 
 const DEFAULT_DEPOSIT = 25;
@@ -37,9 +48,13 @@ export function BookingFlow({ business }: BookingFlowProps) {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("hotel");
 
   const bookingType = INDUSTRY_TO_BOOKING_TYPE[business.industry] ?? "table";
-  const amount = DEFAULT_DEPOSIT;
+  const isProductBooking = bookingType === "product";
+  const baseAmount = DEFAULT_DEPOSIT;
+  const { fee: deliveryFee } = calculateDelivery(baseAmount, deliveryMethod);
+  const amount = baseAmount + deliveryFee;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -57,6 +72,8 @@ export function BookingFlow({ business }: BookingFlowProps) {
           guests: guests || null,
           notes: notes || null,
           amount,
+          delivery_method: isProductBooking ? deliveryMethod : null,
+          delivery_fee: isProductBooking ? deliveryFee : 0,
         }),
       });
       const data = await res.json();
@@ -135,6 +152,33 @@ export function BookingFlow({ business }: BookingFlowProps) {
           className="w-full rounded-xl border border-line bg-surface-card px-4 py-3 text-sm text-ink"
         />
       </div>
+      {isProductBooking && (
+        <div className="space-y-2">
+          <label className="block text-xs font-semibold text-ink">
+            Delivery
+          </label>
+          <div className="flex gap-2">
+            {(["hotel", "home", "pickup"] as const).map((m) => {
+              const label = m === "hotel" ? "Hotel" : m === "home" ? "Home" : "Pickup";
+              const { fee } = calculateDelivery(baseAmount, m);
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setDeliveryMethod(m)}
+                  className={`rounded-xl border px-3 py-2 text-sm font-medium ${
+                    deliveryMethod === m
+                      ? "border-gold bg-gold/10 text-gold"
+                      : "border-line bg-surface-card text-ink"
+                  }`}
+                >
+                  {label} {fee === 0 ? "FREE" : `€${fee.toFixed(2)}`}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <div className="space-y-2">
         <label className="block text-xs font-semibold text-ink">
           Notes (optional)
@@ -148,7 +192,8 @@ export function BookingFlow({ business }: BookingFlowProps) {
         />
       </div>
       <p className="text-xs text-ink-muted">
-        Deposit: €{amount.toFixed(2)} (held until confirmed)
+        Deposit: €{baseAmount.toFixed(2)}
+        {deliveryFee > 0 && ` + delivery €${deliveryFee.toFixed(2)}`} = €{amount.toFixed(2)} (held until confirmed)
       </p>
       {error && (
         <p className="text-xs text-live">{error}</p>

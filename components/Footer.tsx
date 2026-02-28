@@ -71,6 +71,13 @@ export default function Footer() {
         </div>
         <div className="pj-footer-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 20, alignItems: 'center' }}>
           <Link
+            href="/pjazza/legal"
+            className="pj-footer-link"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', textDecoration: 'none', transition: 'color 0.2s ease' }}
+          >
+            Legal
+          </Link>
+          <Link
             href="/pjazza/legal/terms"
             className="pj-footer-link"
             style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', textDecoration: 'none', transition: 'color 0.2s ease' }}
@@ -111,6 +118,20 @@ export default function Footer() {
             style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', textDecoration: 'none', transition: 'color 0.2s ease' }}
           >
             <Smartphone size={14} /> Install app
+          </Link>
+          <Link
+            href="/pjazza/community"
+            className="pj-footer-link"
+            style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', textDecoration: 'none', transition: 'color 0.2s ease' }}
+          >
+            Community
+          </Link>
+          <Link
+            href="/pjazza/magazine"
+            className="pj-footer-link"
+            style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-tertiary)', textDecoration: 'none', transition: 'color 0.2s ease' }}
+          >
+            Magazine
           </Link>
         </div>
       </div>

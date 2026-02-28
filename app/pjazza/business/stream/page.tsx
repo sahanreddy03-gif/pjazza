@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { saveVideo, getVideos, deleteVideo, type StoredVideo } from '@/src/lib/video-storage';
 import { createClient } from '@/src/lib/supabase/client';
+import { VIDEO_PRESETS, getPresetAspectRatio, getPresetMaxSeconds, type PresetId } from '@/src/lib/video-presets';
 
 function ViewHeader({ onBack, viewerCount, isLive }: { onBack: () => void; viewerCount: number; isLive: boolean }) {
   return (
@@ -28,7 +29,8 @@ function ViewHeader({ onBack, viewerCount, isLive }: { onBack: () => void; viewe
   );
 }
 
-function CameraView({ stream, isRecording, isLive }: { stream: MediaStream | null; isRecording: boolean; isLive: boolean }) {
+function CameraView({ stream, isRecording, isLive, presetId }: { stream: MediaStream | null; isRecording: boolean; isLive: boolean; presetId: PresetId }) {
+  const aspectRatio = getPresetAspectRatio(presetId);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ function CameraView({ stream, isRecording, isLive }: { stream: MediaStream | nul
 
   if (!stream) {
     return (
-      <div style={{ position: 'relative', aspectRatio: '9/16', maxHeight: '65vh', background: 'var(--pj-surface-1)', borderRadius: 'var(--pj-radius-lg)', overflow: 'hidden', margin: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'relative', aspectRatio, maxHeight: '65vh', background: 'var(--pj-surface-1)', borderRadius: 'var(--pj-radius-lg)', overflow: 'hidden', margin: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', padding: 24 }}>
           <Video size={48} style={{ color: 'var(--pj-text-tertiary)', marginBottom: 16 }} />
           <p style={{ fontSize: 'var(--pj-size-body)', fontWeight: 600, color: 'var(--pj-text-secondary)' }}>Requesting camera...</p>
@@ -49,7 +51,7 @@ function CameraView({ stream, isRecording, isLive }: { stream: MediaStream | nul
   }
 
   return (
-    <div style={{ position: 'relative', aspectRatio: '9/16', maxHeight: '65vh', borderRadius: 'var(--pj-radius-lg)', overflow: 'hidden', margin: '0 16px' }}>
+    <div style={{ position: 'relative', aspectRatio, maxHeight: '65vh', borderRadius: 'var(--pj-radius-lg)', overflow: 'hidden', margin: '0 16px' }}>
       <video ref={videoRef} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
       {isLive && (
         <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 'var(--pj-radius-pill)', background: 'var(--pj-red)', fontSize: 11, fontWeight: 700, color: 'white' }}>
@@ -62,26 +64,40 @@ function CameraView({ stream, isRecording, isLive }: { stream: MediaStream | nul
         </div>
       )}
       <div style={{ position: 'absolute', bottom: 12, left: 12, right: 12, display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{ padding: '4px 10px', borderRadius: 'var(--pj-radius-pill)', background: 'rgba(0,0,0,0.5)', fontSize: 'var(--pj-size-micro)', fontWeight: 600, color: 'var(--pj-text-secondary)' }}>9:16</span>
+        <span style={{ padding: '4px 10px', borderRadius: 'var(--pj-radius-pill)', background: 'rgba(0,0,0,0.5)', fontSize: 'var(--pj-size-micro)', fontWeight: 600, color: 'var(--pj-text-secondary)' }}>{VIDEO_PRESETS[presetId].ratio}</span>
         <span style={{ padding: '4px 10px', borderRadius: 'var(--pj-radius-pill)', background: 'rgba(0,0,0,0.5)', fontSize: 'var(--pj-size-micro)', fontWeight: 600, color: 'var(--pj-text-secondary)' }}>HD</span>
       </div>
     </div>
   );
 }
 
-function StreamPresets({ active, onChange }: { active: string; onChange: (v: string) => void }) {
-  const presets = [
-    { id: 'product', label: 'Product', Icon: Smartphone },
-    { id: 'tour', label: 'Tour', Icon: Video },
-    { id: 'portrait', label: 'Portrait', Icon: Camera },
+const PRESET_ICONS: Record<string, typeof Smartphone> = {
+  tiktok: Smartphone,
+  shorts: Video,
+  ig_story: Camera,
+  ig_feed: Film,
+  live: Radio,
+  vibe_cam: Video,
+};
+
+function StreamPresets({ active, onChange }: { active: PresetId; onChange: (v: PresetId) => void }) {
+  const presets: { id: PresetId; label: string }[] = [
+    { id: 'tiktok', label: 'TikTok' },
+    { id: 'shorts', label: 'Shorts' },
+    { id: 'ig_story', label: 'IG Story' },
+    { id: 'live', label: 'Live' },
+    { id: 'vibe_cam', label: 'Vibe' },
   ];
   return (
-    <div style={{ padding: '16px 16px 0', display: 'flex', gap: 8 }}>
-      {presets.map((p) => (
-        <button key={p.id} className={`pj-pill ${active === p.id ? 'pj-pill-active' : ''}`} onClick={() => onChange(p.id)} style={{ flex: 1, justifyContent: 'center' }}>
-          <p.Icon size={14} strokeWidth={2} /> {p.label}
-        </button>
-      ))}
+    <div style={{ padding: '16px 16px 0', display: 'flex', gap: 6, overflowX: 'auto', flexWrap: 'nowrap' }}>
+      {presets.map((p) => {
+        const Icon = PRESET_ICONS[p.id] || Video;
+        return (
+          <button key={p.id} className={`pj-pill ${active === p.id ? 'pj-pill-active' : ''}`} onClick={() => onChange(p.id)} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '8px 14px' }}>
+            <Icon size={14} strokeWidth={2} /> {p.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -175,6 +191,12 @@ function UploadView({ onSaved }: { onSaved?: () => void }) {
   const handlePublishToStore = async () => {
     if (!selectedFile || !title || !selectedBusiness) {
       setUploadError(selectedBusiness ? 'Title is required' : 'Select a store first');
+      return;
+    }
+    const allowRes = await fetch(`/api/businesses/${selectedBusiness}/stream-allow`);
+    const allow = await allowRes.json();
+    if (!allow.allowed) {
+      setUploadError('Free plan: 3 streams/month used. Upgrade to Starter for unlimited.');
       return;
     }
     setSaving(true);
@@ -344,7 +366,7 @@ export default function RecordingStudio() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const [preset, setPreset] = useState('product');
+  const [preset, setPreset] = useState<PresetId>('live');
   const [mode, setMode] = useState<'live' | 'upload' | 'library'>(tabParam === 'upload' ? 'upload' : 'live');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isLive, setIsLive] = useState(false);
@@ -357,13 +379,15 @@ export default function RecordingStudio() {
 
   const startCamera = useCallback(async () => {
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 1280, height: 720 }, audio: true });
+      const aspect = getPresetAspectRatio(preset);
+      const [w, h] = aspect === '16/9' ? [1280, 720] : aspect === '4/5' ? [720, 900] : [720, 1280];
+      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: w, height: h }, audio: true });
       setStream(s);
       return s;
     } catch (err) {
       console.error('Camera error:', err);
     }
-  }, []);
+  }, [preset]);
 
   const stopCamera = useCallback(() => {
     stream?.getTracks().forEach((t) => t.stop());
@@ -378,7 +402,10 @@ export default function RecordingStudio() {
       return () => { clearTimeout(id); stopCamera(); };
     }
     stopCamera();
-  }, [mode]);
+  }, [mode, preset]);
+
+  const maxSeconds = getPresetMaxSeconds(preset);
+  const durationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startRecording = async () => {
     if (!stream) return;
@@ -387,6 +414,10 @@ export default function RecordingStudio() {
     mediaRecorderRef.current = mr;
     mr.ondataavailable = (e) => { if (e.data.size) chunksRef.current.push(e.data); };
     mr.onstop = async () => {
+      if (durationTimerRef.current) {
+        clearTimeout(durationTimerRef.current);
+        durationTimerRef.current = null;
+      }
       const blob = new Blob(chunksRef.current, { type: 'video/webm' });
       try {
         await saveVideo({ blob, title: `Recording ${new Date().toLocaleTimeString()}`, description: '', category: '', createdAt: new Date().toISOString(), durationSeconds: 0 });
@@ -399,6 +430,14 @@ export default function RecordingStudio() {
     mr.start();
     setIsRecording(true);
     setIsLive(true);
+    if (typeof maxSeconds === 'number' && maxSeconds > 0) {
+      durationTimerRef.current = setTimeout(() => {
+        mediaRecorderRef.current?.stop();
+        mediaRecorderRef.current = null;
+        setIsRecording(false);
+        durationTimerRef.current = null;
+      }, maxSeconds * 1000);
+    }
   };
 
   const stopRecording = () => {
@@ -427,7 +466,7 @@ export default function RecordingStudio() {
         {mode === 'live' && (
           <>
             <div style={{ marginTop: 8 }}>
-              <CameraView stream={stream} isRecording={isRecording} isLive={isLive} />
+              <CameraView stream={stream} isRecording={isRecording} isLive={isLive} presetId={preset} />
             </div>
             <StreamPresets active={preset} onChange={setPreset} />
             <RecordControls onRecord={startRecording} onStopRecord={stopRecording} isRecording={isRecording} onLive={() => setIsLive(true)} />

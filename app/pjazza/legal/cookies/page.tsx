@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 export default function CookiesPage() {
@@ -8,9 +9,14 @@ export default function CookiesPage() {
 
   return (
     <div className="pj-section" style={{ paddingTop: 60, paddingBottom: 80, maxWidth: 720 }}>
-      <button className="pj-btn-ghost" style={{ marginBottom: 24, gap: 6 }} onClick={() => router.back()}>
-        <ArrowLeft size={16} /> Back
-      </button>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+        <button className="pj-btn-ghost" style={{ gap: 6 }} onClick={() => router.back()}>
+          <ArrowLeft size={16} /> Back
+        </button>
+        <Link href="/pjazza/discover" className="pj-btn-ghost" style={{ gap: 6, textDecoration: 'none', color: 'inherit' }}>
+          Home
+        </Link>
+      </div>
       <h1 style={{ fontSize: 'var(--pj-size-h1)', fontWeight: 800, color: 'var(--pj-text)', marginBottom: 32 }}>
         Cookie Policy
       </h1>
