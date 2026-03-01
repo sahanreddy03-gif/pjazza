@@ -38,3 +38,12 @@ ALTER TABLE public.businesses
 ALTER TABLE public.businesses
   ADD COLUMN IF NOT EXISTS crowd_pct INT DEFAULT 0 CHECK (crowd_pct >= 0 AND crowd_pct <= 100),
   ADD COLUMN IF NOT EXISTS crowd_updated_at TIMESTAMPTZ;
+
+-- 021 (fix "cannot create business" — profile insert + business insert policies)
+DROP POLICY IF EXISTS "Users insert own profile" ON public.profiles;
+CREATE POLICY "Users insert own profile"
+  ON public.profiles FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Authenticated insert own business" ON public.businesses;
+CREATE POLICY "Authenticated insert own business"
+  ON public.businesses FOR INSERT TO authenticated WITH CHECK (auth.uid() = owner_id);

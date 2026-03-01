@@ -5,15 +5,20 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { createClient } from '@/src/lib/supabase/client';
 
-type Business = { id: string; name: string; description: string | null; locality: string | null; address_full: string | null; phone: string | null; website_url: string | null; price_tier?: string | null; dietary_tags?: string[]; wheelchair_accessible?: boolean };
+type Business = { id: string; name: string; description: string | null; locality: string | null; address_full: string | null; phone: string | null; website_url: string | null; cover_image_url?: string | null; price_tier?: string | null; dietary_tags?: string[]; wheelchair_accessible?: boolean };
 
 export default function BusinessSettingsPage() {
   const router = useRouter();
+  const [isNew, setIsNew] = useState(false);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedId, setSelectedId] = useState('');
-  const [form, setForm] = useState({ name: '', description: '', locality: '', address: '', phone: '', website_url: '', price_tier: '', dietary_tags: [] as string[], wheelchair_accessible: false });
+  const [form, setForm] = useState({ name: '', description: '', locality: '', address: '', phone: '', website_url: '', cover_image_url: '', price_tier: '', dietary_tags: [] as string[], wheelchair_accessible: false });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setIsNew(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('new') === '1');
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -37,6 +42,7 @@ export default function BusinessSettingsPage() {
               address: first.address_full ?? '',
               phone: first.phone ?? '',
               website_url: first.website_url ?? '',
+              cover_image_url: first.cover_image_url ?? '',
               price_tier: first.price_tier ?? '',
               dietary_tags: Array.isArray(first.dietary_tags) ? first.dietary_tags : [],
               wheelchair_accessible: !!first.wheelchair_accessible,
@@ -58,6 +64,7 @@ export default function BusinessSettingsPage() {
         address: b.address_full ?? '',
         phone: b.phone ?? '',
         website_url: b.website_url ?? '',
+        cover_image_url: b.cover_image_url ?? '',
         price_tier: b.price_tier ?? '',
         dietary_tags: Array.isArray(b.dietary_tags) ? b.dietary_tags : [],
         wheelchair_accessible: !!b.wheelchair_accessible,
@@ -80,6 +87,7 @@ export default function BusinessSettingsPage() {
           address_full: form.address || undefined,
           phone: form.phone || undefined,
           website_url: form.website_url || undefined,
+          cover_image_url: form.cover_image_url.trim() || undefined,
           price_tier: form.price_tier || undefined,
           dietary_tags: form.dietary_tags.length ? form.dietary_tags : undefined,
           wheelchair_accessible: form.wheelchair_accessible,
@@ -123,8 +131,14 @@ export default function BusinessSettingsPage() {
       </div>
 
       <div style={{ padding: 24 }}>
+        {isNew && (
+          <div style={{ padding: 16, background: 'var(--pj-green-soft, rgba(34,197,94,0.15))', borderRadius: 12, marginBottom: 24, border: '1px solid var(--pj-green-border, rgba(34,197,94,0.3))' }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--pj-text)', marginBottom: 4 }}>Business created</p>
+            <p style={{ fontSize: 13, color: 'var(--pj-text-secondary)', lineHeight: 1.5 }}>Add details, cover photo, and products below. Then go to Dashboard → Upload video or Go live.</p>
+          </div>
+        )}
         <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--pj-text)', marginBottom: 8 }}>Business settings</h1>
-        <p style={{ fontSize: 14, color: 'var(--pj-text-tertiary)', marginBottom: 24 }}>Edit your business details.</p>
+        <p style={{ fontSize: 14, color: 'var(--pj-text-tertiary)', marginBottom: 24 }}>Edit your business details. Add a cover photo URL for discover.</p>
 
         {businesses.length === 0 ? (
           <p style={{ fontSize: 14, color: 'var(--pj-text-secondary)' }}>Claim a business first.</p>
@@ -153,6 +167,9 @@ export default function BusinessSettingsPage() {
             <input type="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} style={inputStyle} />
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Website</label>
             <input type="url" value={form.website_url} onChange={(e) => setForm((f) => ({ ...f, website_url: e.target.value }))} placeholder="https://" style={inputStyle} />
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Cover photo URL</label>
+            <input type="url" value={form.cover_image_url} onChange={(e) => setForm((f) => ({ ...f, cover_image_url: e.target.value }))} placeholder="https://..." style={inputStyle} />
+            {form.cover_image_url && <img src={form.cover_image_url} alt="Preview" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8, marginBottom: 12 }} />}
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Price tier</label>
             <select value={form.price_tier} onChange={(e) => setForm((f) => ({ ...f, price_tier: e.target.value }))} style={inputStyle}>
               <option value="">Not set</option>

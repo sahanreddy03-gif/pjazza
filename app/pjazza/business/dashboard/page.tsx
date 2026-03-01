@@ -531,6 +531,29 @@ export default function BusinessDashboard() {
       <div className="pj-section" style={{ paddingTop: 20, paddingBottom: 20 }}>
         <QuickStats revenueMonth={revenueMonth} pendingCount={bookings.filter((b) => b.status === 'pending').length} streak={streak} avgResponse={avgResponse} />
 
+        {loaded && businesses.length > 0 && (
+          <ScrollReveal>
+            <div className="pj-card" style={{ padding: 16, marginTop: 20, borderColor: 'var(--pj-gold-border, var(--pj-border))', background: 'var(--pj-gold-soft, var(--pj-surface-1))' }}>
+              <h3 style={{ fontSize: 'var(--pj-size-small)', fontWeight: 700, color: 'var(--pj-text)', marginBottom: 8 }}>Complete setup</h3>
+              <p style={{ fontSize: 'var(--pj-size-xs)', color: 'var(--pj-text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>Add details, photo, products, and videos so customers can find you.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button type="button" className="pj-btn-secondary" style={{ width: '100%', padding: 12, fontSize: 14, textAlign: 'left', justifyContent: 'flex-start' }} onClick={() => router.push('/pjazza/business/settings')}>
+                  <Settings size={16} style={{ marginRight: 8, flexShrink: 0 }} />
+                  1. Add details & cover photo
+                </button>
+                <button type="button" className="pj-btn-secondary" style={{ width: '100%', padding: 12, fontSize: 14, textAlign: 'left', justifyContent: 'flex-start' }} onClick={() => router.push('/pjazza/business/products')}>
+                  <Package size={16} style={{ marginRight: 8, flexShrink: 0 }} />
+                  2. Add products
+                </button>
+                <button type="button" className="pj-btn-secondary" style={{ width: '100%', padding: 12, fontSize: 14, textAlign: 'left', justifyContent: 'flex-start' }} onClick={() => router.push('/pjazza/business/stream?tab=upload')}>
+                  <Upload size={16} style={{ marginRight: 8, flexShrink: 0 }} />
+                  3. Upload video
+                </button>
+              </div>
+            </div>
+          </ScrollReveal>
+        )}
+
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Suspense fallback={null}>
             <ConnectStripeSection businesses={businesses} />

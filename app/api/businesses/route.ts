@@ -1,4 +1,4 @@
-import { createClient } from "@/src/lib/supabase/server";
+import { createClient, createAdminClient } from "@/src/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 function slugify(name: string): string {
@@ -13,6 +13,20 @@ export async function POST(req: NextRequest) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Ensure profile exists (FK businesses.owner_id -> profiles.id). Use admin client so RLS/migration not required.
+    const profilePayload = {
+      id: user.id,
+      role: (user.user_metadata?.role as string) || "business",
+      full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email,
+    };
+    try {
+      const admin = createAdminClient();
+      await admin.from("profiles").upsert(profilePayload, { onConflict: "id" });
+    } catch {
+      const { error: profileErr } = await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
+      if (profileErr) console.error("[POST /api/businesses] profile upsert", profileErr);
+    }
 
     const body = await req.json();
     const name = body?.name?.trim();
@@ -49,6 +63,13 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       if (error.code === "23505") return NextResponse.json({ error: "Business already exists" }, { status: 409 });
+      if (error.code === "23503") {
+        return NextResponse.json(
+          { error: "Profile missing. Please sign out, sign in again, then try creating your business." },
+          { status: 400 }
+        );
+      }
+      console.error("[POST /api/businesses]", error.code, error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     return NextResponse.json(data);

@@ -46,7 +46,10 @@ export default function BusinessLivePage() {
         body: JSON.stringify({ business_id: selectedStore }),
       });
       const streamData = await streamRes.json();
-      if (streamRes.ok && streamData?.id) setStreamId(streamData.id);
+      if (!streamRes.ok) {
+        throw new Error(streamData?.error || 'Failed to start stream. Claim or create a business first.');
+      }
+      if (streamData?.id) setStreamId(streamData.id);
 
       const res = await fetch('/api/livekit/token', {
         method: 'POST',
@@ -68,6 +71,7 @@ export default function BusinessLivePage() {
   };
 
   const serverUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+  const livekitMissing = token && !serverUrl;
 
   if (token && serverUrl) {
     return (
@@ -146,6 +150,11 @@ export default function BusinessLivePage() {
 
         {error && (
           <p style={{ marginTop: 12, fontSize: 13, color: 'var(--pj-red)' }}>{error}</p>
+        )}
+        {livekitMissing && (
+          <p style={{ marginTop: 12, fontSize: 13, color: 'var(--pj-red)', padding: 12, background: 'var(--pj-red-soft)', borderRadius: 8 }}>
+            LiveKit URL not configured. Add NEXT_PUBLIC_LIVEKIT_URL in Vercel env vars.
+          </p>
         )}
 
         <button

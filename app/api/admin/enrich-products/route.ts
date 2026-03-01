@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
           name: p.name.slice(0, 200),
           description: p.description ?? null,
           price: p.price ?? 0,
+          image_urls: p.image_url ? [p.image_url] : [],
           is_available: true,
         });
         if (!insErr) productsAdded++;

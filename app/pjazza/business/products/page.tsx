@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ArrowLeft, Plus, Trash2, Package, Loader2, CheckCircle
+  ArrowLeft, Plus, Trash2, Package, Loader2, CheckCircle, Globe, ImageIcon
 } from 'lucide-react';
 import { createClient } from '@/src/lib/supabase/client';
 
-type Business = { id: string; name: string };
-type Product = { id: string; name: string; description: string | null; price: number; is_available: boolean };
+type Business = { id: string; name: string; website_url?: string | null };
+type Product = { id: string; name: string; description: string | null; price: number; image_urls?: string[]; is_available: boolean };
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -17,8 +17,8 @@ export default function ProductsPage() {
   const [selectedBiz, setSelectedBiz] = useState('');
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: '', description: '', price: 0 });
+  const [form, setForm] = useState({ name: '', description: '', price: 0, image_url: '' });
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -59,18 +59,47 @@ export default function ProductsPage() {
           name: form.name,
           description: form.description || null,
           price: Number(form.price),
+          image_urls: form.image_url.trim() ? form.image_url.trim().split(/[,\s]+/).filter(Boolean) : undefined,
         }),
       });
       const data = await res.json();
       if (res.ok) {
         setProducts((p) => [data, ...p]);
-        setForm({ name: '', description: '', price: 0 });
+        setForm({ name: '', description: '', price: 0, image_url: '' });
         setAdding(false);
       } else throw new Error(data.error);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to add');
     } finally {
       setAdding(false);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!selectedBiz) return;
+    const biz = businesses.find((b) => b.id === selectedBiz);
+    if (!biz?.website_url?.trim()) {
+      alert('Add your website URL in Business settings first.');
+      return;
+    }
+    setImporting(true);
+    try {
+      const res = await fetch(`/api/businesses/${selectedBiz}/import-products`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.added > 0) {
+        const r = await fetch(`/api/businesses/${selectedBiz}/products`);
+        const list = await r.json();
+        setProducts(list);
+        alert(`Imported ${data.added} product(s) from your website.`);
+      } else if (res.ok && data.added === 0) {
+        alert('No products found on your website. Add them manually.');
+      } else {
+        alert(data.error || 'Import failed');
+      }
+    } catch {
+      alert('Import failed');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -123,7 +152,7 @@ export default function ProductsPage() {
               value={selectedBiz}
               onChange={(e) => setSelectedBiz(e.target.value)}
               style={{
-                width: '100%', padding: 12, borderRadius: 8, marginBottom: 24,
+                width: '100%', padding: 12, borderRadius: 8, marginBottom: 12,
                 background: 'var(--pj-surface-2)', border: '1px solid var(--pj-border)',
                 color: 'var(--pj-text)', fontSize: 15, fontFamily: 'inherit',
               }}
@@ -132,6 +161,19 @@ export default function ProductsPage() {
                 <option key={b.id} value={b.id}>{b.name}</option>
               ))}
             </select>
+
+            {selectedBiz && businesses.find((b) => b.id === selectedBiz)?.website_url && (
+              <button
+                type="button"
+                onClick={handleImport}
+                disabled={importing}
+                className="pj-btn-secondary"
+                style={{ width: '100%', marginBottom: 24, padding: 12, fontSize: 14 }}
+              >
+                {importing ? <Loader2 size={16} className="animate-spin" style={{ marginRight: 8 }} /> : <Globe size={16} style={{ marginRight: 8 }} />}
+                {importing ? 'Importing…' : 'Import from website'}
+              </button>
+            )}
 
             <form onSubmit={handleAdd} style={{ marginBottom: 24, padding: 16, background: 'var(--pj-surface-1)', borderRadius: 12, border: '1px solid var(--pj-border)' }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--pj-text)', marginBottom: 12 }}>
@@ -169,6 +211,18 @@ export default function ProductsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))}
                 required
                 style={{
+                  width: '100%', padding: 10, borderRadius: 8, marginBottom: 8,
+                  background: 'var(--pj-surface-2)', border: '1px solid var(--pj-border)',
+                  color: 'var(--pj-text)', fontSize: 14, fontFamily: 'inherit',
+                }}
+              />
+              <label style={{ display: 'block', fontSize: 12, color: 'var(--pj-text-tertiary)', marginBottom: 4 }}>Image URL (optional)</label>
+              <input
+                type="url"
+                placeholder="https://..."
+                value={form.image_url}
+                onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
+                style={{
                   width: '100%', padding: 10, borderRadius: 8, marginBottom: 12,
                   background: 'var(--pj-surface-2)', border: '1px solid var(--pj-border)',
                   color: 'var(--pj-text)', fontSize: 14, fontFamily: 'inherit',
@@ -194,6 +248,13 @@ export default function ProductsPage() {
                       className="pj-card"
                       style={{ padding: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
                     >
+                      {(p.image_urls?.length && p.image_urls[0]) ? (
+                        <img src={p.image_urls[0]} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 48, height: 48, background: 'var(--pj-surface-2)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <ImageIcon size={20} style={{ color: 'var(--pj-text-tertiary)' }} />
+                        </div>
+                      )}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--pj-text)' }}>{p.name}</span>

@@ -227,7 +227,7 @@ function AddNewBusiness() {
         setError(data?.error || 'Failed to create business');
         return;
       }
-      router.push('/pjazza/business/dashboard');
+      router.push('/pjazza/business/settings?new=1');
       router.refresh();
     } catch {
       setError('Failed to create business');
