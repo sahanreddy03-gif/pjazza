@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Eye, DollarSign, Star, Video, TrendingUp,
@@ -518,7 +518,9 @@ export default function BusinessDashboard() {
         <QuickStats revenueMonth={revenueMonth} pendingCount={bookings.filter((b) => b.status === 'pending').length} streak={streak} avgResponse={avgResponse} />
 
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <ConnectStripeSection businesses={businesses} />
+          <Suspense fallback={null}>
+            <ConnectStripeSection businesses={businesses} />
+          </Suspense>
           <GoLiveButton />
           <button
             className="pj-btn-primary pj-touch"
