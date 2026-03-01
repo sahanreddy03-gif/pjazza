@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowRight, Search, CheckCircle, MapPin, Star,
@@ -495,7 +495,9 @@ export default function BusinessOnboard() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--pj-black)' }}>
       <OnboardHeader />
-      <FindYourBusiness />
+      <Suspense fallback={null}>
+        <FindYourBusiness />
+      </Suspense>
       <div className="pj-divider" />
       <PitchHero />
       <div className="pj-divider" />

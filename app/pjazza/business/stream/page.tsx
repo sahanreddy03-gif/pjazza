@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { Suspense, useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft, Video, Camera, Smartphone, Radio, Users, MessageSquare, Settings,
@@ -362,7 +362,7 @@ function VideoLibrary({ videos, onDelete, onRefresh }: { videos: StoredVideo[]; 
   );
 }
 
-export default function RecordingStudio() {
+function RecordingStudioContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -477,5 +477,13 @@ export default function RecordingStudio() {
         {mode === 'library' && <VideoLibrary videos={videos} onDelete={(id) => setVideos((v) => v.filter((x) => x.id !== id))} onRefresh={loadVideos} />}
       </div>
     </div>
+  );
+}
+
+export default function RecordingStudio() {
+  return (
+    <Suspense fallback={null}>
+      <RecordingStudioContent />
+    </Suspense>
   );
 }

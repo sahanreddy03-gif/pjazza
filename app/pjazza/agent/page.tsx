@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Phone, Video, LogIn, LogOut, User, Store, Headphones,
@@ -9,7 +9,7 @@ import {
 import { createClient } from '@/src/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-export default function AgentPortalPage() {
+function AgentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') ?? '/pjazza/business/dashboard';
@@ -329,5 +329,13 @@ export default function AgentPortalPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AgentPortalPage() {
+  return (
+    <Suspense fallback={null}>
+      <AgentContent />
+    </Suspense>
   );
 }
