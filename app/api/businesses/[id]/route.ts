@@ -29,6 +29,7 @@ export async function PATCH(
         ...(body.locality != null && { locality: body.locality }),
         ...(body.phone != null && { phone: body.phone }),
         ...(body.website_url != null && { website_url: body.website_url }),
+        ...(body.email != null && { email: body.email }),
         ...(body.address_full != null && { address_full: body.address_full }),
         ...(body.cover_image_url != null && { cover_image_url: body.cover_image_url }),
         ...(body.subscription != null && { subscription: body.subscription }),

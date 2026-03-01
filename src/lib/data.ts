@@ -86,7 +86,9 @@ export type StoreWithProducts = {
   vibeSummary?: string;
   addressFull?: string;
   phone?: string;
+  email?: string;
   websiteUrl?: string;
+  links?: { link_type: string; url: string; label?: string | null }[];
   products: {
     id: string;
     name: string;
@@ -139,11 +141,12 @@ function businessToStore(b: BusinessRow & { google_review_count?: number | null;
 }
 
 function businessAndProductsToStore(
-  b: BusinessRow & { logo_url?: string | null; image_urls?: string[] | null; google_review_count?: number | null; google_rating?: number | null; tripadvisor_review_count?: number | null; tripadvisor_rating?: number | null; vibe_summary?: string | null; address_full?: string | null; phone?: string | null; website_url?: string | null },
+  b: BusinessRow & { logo_url?: string | null; image_urls?: string[] | null; google_review_count?: number | null; google_rating?: number | null; tripadvisor_review_count?: number | null; tripadvisor_rating?: number | null; vibe_summary?: string | null; address_full?: string | null; phone?: string | null; email?: string | null; website_url?: string | null },
   products: ProductRow[],
   salespersonName: string,
   videoUrl?: string | null,
-  curatedReviews?: { platform: string; rating: number; review_text: string; author_name: string | null; is_positive: boolean }[]
+  curatedReviews?: { platform: string; rating: number; review_text: string; author_name: string | null; is_positive: boolean }[],
+  links?: { link_type: string; url: string; label?: string | null }[]
 ): StoreWithProducts {
   const sector = b.industry || "retail";
   const sectorLabel = SECTOR_LABELS[sector] || sector;
@@ -174,7 +177,9 @@ function businessAndProductsToStore(
     vibeSummary: b.vibe_summary || undefined,
     addressFull: b.address_full || undefined,
     phone: b.phone || undefined,
+    email: b.email || undefined,
     websiteUrl: b.website_url || undefined,
+    links: links || undefined,
     products: products.map((p) => ({
       id: p.id,
       name: p.name,
@@ -270,9 +275,10 @@ export async function getStoreBySlug(slugOrId: string): Promise<StoreWithProduct
       .eq("is_available", true)
       .order("name");
 
-    const [{ data: stream }, { data: allReviews }] = await Promise.all([
+    const [{ data: stream }, { data: allReviews }, { data: linkRows }] = await Promise.all([
       supabase.from("streams").select("video_url").eq("business_id", business.id).not("video_url", "is", null).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("business_reviews").select("platform, rating, review_text, author_name, is_positive").eq("business_id", business.id),
+      supabase.from("business_links").select("link_type, url, label").eq("business_id", business.id).order("link_type"),
     ]);
     const best = (allReviews || []).filter((r) => r.is_positive).sort((a, b) => b.rating - a.rating).slice(0, 2);
     const worst = (allReviews || []).filter((r) => !r.is_positive).sort((a, b) => a.rating - b.rating).slice(0, 2);
@@ -284,12 +290,14 @@ export async function getStoreBySlug(slugOrId: string): Promise<StoreWithProduct
           (business.name?.charCodeAt(0) || 0) + (business.slug?.charCodeAt(0) || 0)
         ) % 8
       ] || "Sales Rep";
+    const links = (linkRows || []).map((l: { link_type: string; url: string; label?: string | null }) => ({ link_type: l.link_type, url: l.url, label: l.label }));
     return businessAndProductsToStore(
       business as BusinessRow,
       (products || []) as ProductRow[],
       salesperson,
       stream?.video_url,
-      reviews as { platform: string; rating: number; review_text: string; author_name: string | null; is_positive: boolean }[] | undefined
+      reviews as { platform: string; rating: number; review_text: string; author_name: string | null; is_positive: boolean }[] | undefined,
+      links
     );
   } catch {
     return getMockStoreBySlug(slug);
@@ -620,7 +628,7 @@ function getMockStoreBySlug(slug: string): StoreWithProducts | null {
       { platform: "tripadvisor", rating: 4, text: "Worth the hype. Wine list expensive.", author: "Laura S.", isPositive: false },
     ],
   };
-  const richStore = store as StoreForList & { googleReviews?: number; tripadvisorReviews?: number; vibeSummary?: string };
+  const richStore = store as StoreForList & { googleReviews?: number; tripadvisorReviews?: number; vibeSummary?: string; email?: string };
   return {
     id: store.id,
     name: store.name,
@@ -631,6 +639,8 @@ function getMockStoreBySlug(slug: string): StoreWithProducts | null {
     viewers: store.viewers,
     img: store.img,
     imageUrls: [store.img],
+    email: richStore.email,
+    links: [],
     googleReviews: richStore.googleReviews,
     googleRating: richStore.rating,
     tripadvisorReviews: richStore.tripadvisorReviews,

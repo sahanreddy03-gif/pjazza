@@ -193,6 +193,91 @@
 
 ---
 
+## 3.4 Links & Connections — What Businesses Can Link (Auto-Reflect in Profile)
+
+**Principle:** Whatever they link, it shows on their business profile. One source of truth.
+
+### Core Links (Store in DB, Display on Profile)
+
+| Link Type | What | Auto-Reflect? | Notes |
+|-----------|------|---------------|-------|
+| **Website** | Main site URL | Scrape products, meta, schema.org | Enrich products, hours, description |
+| **Email** | Contact email | Display, "Email us" button | Required for inquiries |
+| **Phone** | Contact phone | Display, "Call" button | Required for live calls |
+
+### Social Media (Store URL, Optionally Pull Content)
+
+| Platform | What We Can Pull | Auto-Reflect |
+|----------|------------------|--------------|
+| **Facebook** | Name, bio, photos, events, opening hours | Display link; V2: pull posts/events |
+| **Instagram** | Bio, photos, reels | Display link; V2: Meta API for posts |
+| **LinkedIn** | Company page, jobs | Display link |
+| **TikTok** | Profile, videos | Display link |
+| **X (Twitter)** | Profile, tweets | Display link |
+| **YouTube** | Channel, videos | Display link; V2: embed latest video |
+| **Pinterest** | Boards, pins | Display link |
+
+### Industry-Specific Links
+
+| Type | Examples | Auto-Reflect |
+|------|----------|--------------|
+| **Menu / ordering** | Website menu URL, Deliveroo, Wolt, Uber Eats | Link; V2: scrape menu |
+| **Reservations** | OpenTable, Resy, TheFork | Link; V2: embed widget |
+| **Booking platforms** | Airbnb, Booking.com, VRBO | Link; V2: calendar sync (ICS) |
+| **TripAdvisor** | Business page | Link; V2: pull rating/review count |
+| **Google Maps** | Place URL | Link; V2: pull rating, photos |
+| **WhatsApp** | Business WhatsApp | "Chat on WhatsApp" button |
+| **Event platforms** | Eventbrite, Meetup, Facebook Events | Link; V2: pull upcoming events |
+
+### Calendars & Availability
+
+| Source | What | Auto-Reflect |
+|--------|------|--------------|
+| **ICS / iCal** | Airbnb, Booking.com, Google Calendar | V2: Block dates, show availability |
+| **Opening hours** | Manual or Google sync | Display on profile |
+| **Events** | Facebook Events, Eventbrite | V2: Show "Upcoming events" on profile |
+
+### What You Might Not Have Thought Of
+
+| Link | Use | Notes |
+|------|-----|-------|
+| **WhatsApp Business** | Chat button | High usage in Malta |
+| **Google Maps place** | Directions, rating | One-click link |
+| **Apple Maps** | Directions | iOS users |
+| **Waze** | Directions | Some users prefer |
+| **Trustpilot / Trustindex** | Reviews | Display badge/rating |
+| **Video links** | YouTube, Vimeo, TikTok | Embed or thumbnail |
+| **PDF menu** | Menu URL | Link for download |
+| **PDF brochure** | Brochure URL | Property, yachts |
+| **Virtual tour** | Matterport, Google Street View | Link for property |
+| **Shopify / WooCommerce** | Shop URL | V2: sync products |
+| **Etsy** | Shop URL | V2: sync listings |
+| **Newsletter** | Mailchimp, Substack | "Subscribe" link |
+| **Press / media** | Press kit URL | For verified businesses |
+| **Certifications** | Halal, vegan, eco | Badge on profile |
+| **Delivery zones** | Bolt, Wolt, local | "We deliver to X" |
+
+### How It Auto-Reflects
+
+1. **Store the URL** — Business adds link in settings.
+2. **Display on profile** — Link shows as button/icon on store page.
+3. **V2: Pull content** — Cron or on-save: scrape/API to refresh description, photos, events, products.
+4. **V2: Sync calendar** — ICS feed to block dates, show "Available" on profile.
+
+### Schema for Links (Proposed)
+
+```
+business_links table:
+- business_id
+- link_type: 'website' | 'facebook' | 'instagram' | 'youtube' | 'whatsapp' | 'menu' | 'reservations' | 'booking' | 'tripadvisor' | 'google_maps' | 'eventbrite' | ...
+- url
+- label (optional override)
+- auto_sync: boolean
+- last_synced_at
+```
+
+---
+
 ## 4. Onboarding: What’s Automated vs Manual
 
 | Step | Automated? | Manual? | Notes |

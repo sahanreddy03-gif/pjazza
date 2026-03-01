@@ -320,21 +320,64 @@ export default function LiveShopSessionClient({ store }: { store: StoreWithProdu
                   </div>
                 </div>
               )}
-              {(store.addressFull || store.phone || store.websiteUrl) && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {store.addressFull && (
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12, color: 'var(--pj-text-secondary)' }}>
-                      <MapPin size={14} style={{ flexShrink: 0, marginTop: 2 }} /> {store.addressFull}
+              {(store.addressFull || store.phone || store.email || store.websiteUrl || (store.links && store.links.length > 0)) && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {(store.addressFull || store.phone || store.email || store.websiteUrl) && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {store.addressFull && (
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12, color: 'var(--pj-text-secondary)' }}>
+                          <MapPin size={14} style={{ flexShrink: 0, marginTop: 2 }} /> {store.addressFull}
+                        </div>
+                      )}
+                      {store.phone && (
+                        <a href={`tel:${store.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--pj-red)', textDecoration: 'none' }}>
+                          <Phone size={12} /> Call
+                        </a>
+                      )}
+                      {store.email && (
+                        <a href={`mailto:${store.email}`} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--pj-red)', textDecoration: 'none' }}>
+                          <MessageSquare size={12} /> Email
+                        </a>
+                      )}
+                      {store.websiteUrl && (
+                        <a href={store.websiteUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--pj-red)', textDecoration: 'none' }}>
+                          <ExternalLink size={12} /> Website
+                        </a>
+                      )}
                     </div>
                   )}
-                  {store.phone && (
-                    <a href={`tel:${store.phone}`} style={{ fontSize: 12, color: 'var(--pj-red)', textDecoration: 'none' }}>{store.phone}</a>
+                  {store.links && store.links.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {store.links.map((link, i) => {
+                        const label = link.label || link.link_type.replace(/_/g, ' ');
+                        const href = link.link_type === 'whatsapp' && link.url && !link.url.startsWith('http')
+                          ? `https://wa.me/${link.url.replace(/\D/g, '')}`
+                          : link.url.startsWith('http') ? link.url : `https://${link.url}`;
+                        return (
+                          <a key={i} href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 'var(--pj-radius-pill)', background: 'var(--pj-surface-2)', border: '1px solid var(--pj-border)', fontSize: 12, fontWeight: 600, color: 'var(--pj-text)', textDecoration: 'none' }}>
+                            <ExternalLink size={12} /> {label}
+                          </a>
+                        );
+                      })}
+                    </div>
                   )}
-                  {store.websiteUrl && (
-                    <a href={store.websiteUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--pj-red)', textDecoration: 'none' }}>
-                      <ExternalLink size={12} /> Website
-                    </a>
-                  )}
+                  {/* Video embeds: YouTube, Vimeo — render inline when linked */}
+                  {store.links?.filter((l) => l.link_type === 'youtube' || l.link_type === 'vimeo').map((link, i) => {
+                    let embedSrc: string | null = null;
+                    if (link.link_type === 'youtube') {
+                      const m = link.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+                      if (m) embedSrc = `https://www.youtube.com/embed/${m[1]}`;
+                    } else if (link.link_type === 'vimeo') {
+                      const m = link.url.match(/vimeo\.com\/(\d+)/);
+                      if (m) embedSrc = `https://player.vimeo.com/video/${m[1]}`;
+                    }
+                    if (!embedSrc) return null;
+                    return (
+                      <div key={`embed-${i}`} style={{ borderRadius: 12, overflow: 'hidden', aspectRatio: '16/9', maxWidth: '100%', background: '#111' }}>
+                        <iframe src={embedSrc} title={link.label || link.link_type} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ width: '100%', height: '100%', border: 'none' }} />
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

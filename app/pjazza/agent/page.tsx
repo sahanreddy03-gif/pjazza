@@ -75,6 +75,27 @@ function AgentContent() {
     }
   };
 
+  const handleOAuth = async (provider: "google" | "apple") => {
+    setError(null);
+    setSubmitting(true);
+    try {
+      const supabase = createClient();
+      const { data, error: err } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback?next=${encodeURIComponent(redirect)}`,
+        },
+      });
+      if (err) {
+        setError(err.message);
+        return;
+      }
+      if (data?.url) window.location.href = data.url;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -116,6 +137,33 @@ function AgentContent() {
               {error}
             </p>
           )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+            <button
+              type="button"
+              onClick={() => handleOAuth('google')}
+              disabled={submitting}
+              className="pj-btn-secondary"
+              style={{ width: '100%', padding: 14, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.2 1.05-.8 1.93-1.68 2.51V14h2.72c1.6-1.47 2.52-3.64 2.52-6.2z" fill="#4285F4"/><path d="M9 18c2.28 0 4.2-.76 5.64-2.06l-2.72-2.1c-.76.51-1.73.81-2.92.81-2.25 0-4.16-1.52-4.84-3.56H1.34v2.16C2.79 15.93 5.7 18 9 18z" fill="#34A853"/><path d="M4.16 10.71c-.17-.51-.27-1.06-.27-1.61 0-.55.1-1.1.27-1.61V5.33H1.34C.74 6.58.4 7.96.4 9.4s.34 2.82.94 4.06l2.42-1.87 2.39-1.88z" fill="#FBBC05"/><path d="M9 3.58c1.27 0 2.41.44 3.31 1.29l2.49-2.49C13.2.9 11.28 0 9 0 5.7 0 2.79 2.07 1.34 5.33L4.16 7.49C4.92 5.45 6.84 3.58 9 3.58z" fill="#EA4335"/></svg>
+              Sign in with Google
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOAuth('apple')}
+              disabled={submitting}
+              className="pj-btn-secondary"
+              style={{ width: '100%', padding: 14, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+              Sign in with Apple
+            </button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ flex: 1, height: 1, background: 'var(--pj-border)' }} />
+            <span style={{ fontSize: 12, color: 'var(--pj-text-tertiary)' }}>or</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--pj-border)' }} />
+          </div>
           <form onSubmit={signUpMode ? handleSignUp : handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {signUpMode && (
               <div>

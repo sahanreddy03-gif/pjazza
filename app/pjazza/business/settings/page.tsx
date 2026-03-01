@@ -5,14 +5,18 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { createClient } from '@/src/lib/supabase/client';
 
-type Business = { id: string; name: string; description: string | null; locality: string | null; address_full: string | null; phone: string | null; website_url: string | null; cover_image_url?: string | null; price_tier?: string | null; dietary_tags?: string[]; wheelchair_accessible?: boolean };
+type Business = { id: string; name: string; description: string | null; locality: string | null; address_full: string | null; phone: string | null; email: string | null; website_url: string | null; cover_image_url?: string | null; price_tier?: string | null; dietary_tags?: string[]; wheelchair_accessible?: boolean };
+type BusinessLink = { id: string; link_type: string; url: string; label?: string | null };
 
 export default function BusinessSettingsPage() {
   const router = useRouter();
   const [isNew, setIsNew] = useState(false);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedId, setSelectedId] = useState('');
-  const [form, setForm] = useState({ name: '', description: '', locality: '', address: '', phone: '', website_url: '', cover_image_url: '', price_tier: '', dietary_tags: [] as string[], wheelchair_accessible: false });
+  const [form, setForm] = useState({ name: '', description: '', locality: '', address: '', phone: '', email: '', website_url: '', cover_image_url: '', price_tier: '', dietary_tags: [] as string[], wheelchair_accessible: false });
+  const [links, setLinks] = useState<BusinessLink[]>([]);
+  const [newLinkType, setNewLinkType] = useState('instagram');
+  const [newLinkUrl, setNewLinkUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -41,12 +45,14 @@ export default function BusinessSettingsPage() {
               locality: first.locality ?? '',
               address: first.address_full ?? '',
               phone: first.phone ?? '',
+              email: (first as Business).email ?? '',
               website_url: first.website_url ?? '',
               cover_image_url: first.cover_image_url ?? '',
               price_tier: first.price_tier ?? '',
               dietary_tags: Array.isArray(first.dietary_tags) ? first.dietary_tags : [],
               wheelchair_accessible: !!first.wheelchair_accessible,
             });
+            fetch(`/api/businesses/${first.id}/links`).then((r) => r.json()).then((data: BusinessLink[]) => setLinks(Array.isArray(data) ? data : [])).catch(() => setLinks([]));
           }
           setLoading(false);
         })
@@ -63,12 +69,14 @@ export default function BusinessSettingsPage() {
         locality: b.locality ?? '',
         address: b.address_full ?? '',
         phone: b.phone ?? '',
+        email: (b as Business).email ?? '',
         website_url: b.website_url ?? '',
         cover_image_url: b.cover_image_url ?? '',
         price_tier: b.price_tier ?? '',
         dietary_tags: Array.isArray(b.dietary_tags) ? b.dietary_tags : [],
         wheelchair_accessible: !!b.wheelchair_accessible,
       });
+      fetch(`/api/businesses/${selectedId}/links`).then((r) => r.json()).then((data: BusinessLink[]) => setLinks(Array.isArray(data) ? data : [])).catch(() => setLinks([]));
     }
   }, [selectedId, businesses]);
 
@@ -86,6 +94,7 @@ export default function BusinessSettingsPage() {
           locality: form.locality || undefined,
           address_full: form.address || undefined,
           phone: form.phone || undefined,
+          email: form.email || undefined,
           website_url: form.website_url || undefined,
           cover_image_url: form.cover_image_url.trim() || undefined,
           price_tier: form.price_tier || undefined,
@@ -165,6 +174,8 @@ export default function BusinessSettingsPage() {
             <input type="text" value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} style={inputStyle} />
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Phone</label>
             <input type="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} style={inputStyle} />
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Email</label>
+            <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="hello@business.com" style={inputStyle} />
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Website</label>
             <input type="url" value={form.website_url} onChange={(e) => setForm((f) => ({ ...f, website_url: e.target.value }))} placeholder="https://" style={inputStyle} />
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Cover photo URL</label>
@@ -189,6 +200,93 @@ export default function BusinessSettingsPage() {
               <input type="checkbox" checked={form.wheelchair_accessible} onChange={(e) => setForm((f) => ({ ...f, wheelchair_accessible: e.target.checked }))} />
               Wheelchair accessible
             </label>
+
+            <div style={{ marginBottom: 24, padding: 16, background: 'var(--pj-surface-2)', borderRadius: 12, border: '1px solid var(--pj-border)' }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--pj-text)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Link2 size={16} /> Links (social, menu, events, etc.)
+              </h3>
+              <p style={{ fontSize: 12, color: 'var(--pj-text-tertiary)', marginBottom: 12 }}>Add links to your profile. Each shows as a button on your store page.</p>
+              {links.map((l) => (
+                <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: 8, background: 'var(--pj-black)', borderRadius: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--pj-gold)', textTransform: 'capitalize', minWidth: 100 }}>{l.link_type.replace(/_/g, ' ')}</span>
+                  <a href={l.url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, fontSize: 12, color: 'var(--pj-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.url}</a>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const res = await fetch(`/api/businesses/${selectedId}/links?link_type=${encodeURIComponent(l.link_type)}`, { method: 'DELETE' });
+                      if (res.ok) setLinks((prev) => prev.filter((x) => x.id !== l.id));
+                    }}
+                    style={{ padding: 6, background: 'none', border: 'none', color: 'var(--pj-text-tertiary)', cursor: 'pointer' }}
+                    title="Remove link"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+                <select value={newLinkType} onChange={(e) => setNewLinkType(e.target.value)} style={{ ...inputStyle, marginBottom: 0, flex: '1 1 140px' }}>
+                  <optgroup label="Social">
+                    <option value="facebook">Facebook</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="x">X (Twitter)</option>
+                    <option value="pinterest">Pinterest</option>
+                  </optgroup>
+                  <optgroup label="Contact &amp; Order">
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="menu">Menu / Order</option>
+                    <option value="reservations">Reservations</option>
+                    <option value="deliveroo">Deliveroo</option>
+                    <option value="wolt">Wolt</option>
+                    <option value="ubereats">Uber Eats</option>
+                  </optgroup>
+                  <optgroup label="Bookings &amp; Reviews">
+                    <option value="airbnb">Airbnb</option>
+                    <option value="booking">Booking.com</option>
+                    <option value="tripadvisor">TripAdvisor</option>
+                    <option value="google_maps">Google Maps</option>
+                  </optgroup>
+                  <optgroup label="Other">
+                    <option value="eventbrite">Eventbrite</option>
+                    <option value="meetup">Meetup</option>
+                    <option value="trustpilot">Trustpilot</option>
+                    <option value="vimeo">Vimeo</option>
+                    <option value="virtual_tour">Virtual Tour</option>
+                    <option value="other">Other</option>
+                  </optgroup>
+                </select>
+                <input
+                  type="url"
+                  value={newLinkUrl}
+                  onChange={(e) => setNewLinkUrl(e.target.value)}
+                  placeholder="https://..."
+                  style={{ ...inputStyle, marginBottom: 0, flex: '2 1 200px' }}
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!newLinkUrl.trim()) return;
+                    const res = await fetch(`/api/businesses/${selectedId}/links`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ link_type: newLinkType, url: newLinkUrl.trim() }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data) {
+                      setLinks((prev) => [...prev.filter((x) => x.link_type !== newLinkType), data]);
+                      setNewLinkUrl('');
+                    } else alert(data?.error || 'Failed to add link');
+                  }}
+                  disabled={!newLinkUrl.trim()}
+                  style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--pj-red)', border: 'none', color: 'white', fontSize: 13, fontWeight: 600, cursor: newLinkUrl.trim() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <Plus size={14} /> Add
+                </button>
+              </div>
+            </div>
+
             <button type="submit" className="pj-btn-primary" style={{ width: '100%', padding: 16 }} disabled={saving}>
               {saving ? <Loader2 size={18} className="animate-spin" style={{ marginRight: 8 }} /> : <Save size={18} style={{ marginRight: 8 }} />}
               {saving ? 'Saving…' : 'Save'}

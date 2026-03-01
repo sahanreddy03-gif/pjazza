@@ -22,6 +22,8 @@ Run this before saying "everything works". Check each item; fix before deploying
 - [ ] RLS policies correct: `010_claim_business_rls` for claiming
 - [ ] Storage bucket `stream-videos` exists (003_storage_bucket)
 - [ ] Auth → URL config: production URL + redirect URLs added
+- [ ] Auth → Redirect URLs: add `https://yoursite.com/auth/callback`
+- [ ] Auth → Providers: enable Google and Apple (for OAuth sign-in)
 
 ---
 

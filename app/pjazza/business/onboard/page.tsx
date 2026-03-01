@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/src/lib/supabase/client';
 import {
   ArrowRight, Search, CheckCircle, MapPin, Star, Plus, Loader2,
   Utensils, Home, Ship, Car, Heart, Wrench,
@@ -200,17 +201,64 @@ const VALID_INDUSTRIES = [
   { id: 'beauty', label: 'Beauty' },
 ];
 
+const PENDING_CREATE_KEY = 'pjazza_pending_business';
+
 function AddNewBusiness() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [user, setUser] = useState<{ id: string } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [name, setName] = useState('');
   const [industry, setIndustry] = useState('food');
   const [locality, setLocality] = useState('Malta');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user: u } }) => {
+      setUser(u);
+      setAuthLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!authLoading || !searchParams || !user) return;
+    const create = searchParams.get('create') === '1';
+    const pending = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(PENDING_CREATE_KEY) : null;
+    if (!create || !pending) return;
+    let cancelled = false;
+    try {
+      const data = JSON.parse(pending) as { name: string; industry: string; locality: string };
+      sessionStorage.removeItem(PENDING_CREATE_KEY);
+      fetch('/api/businesses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: data.name?.trim(), industry: data.industry || 'retail', locality: data.locality || 'Malta' }),
+      })
+        .then(async (res) => {
+          const body = await res.json();
+          if (cancelled) return;
+          if (res.ok) router.push('/pjazza/business/settings?new=1');
+          else setError(body?.error || 'Failed to create');
+        })
+        .catch(() => { if (!cancelled) setError('Failed to create'); });
+    } catch {
+      if (!cancelled) setError('Invalid saved data');
+    }
+    return () => { cancelled = true; };
+  }, [authLoading, searchParams, user, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!user) {
+      try {
+        sessionStorage.setItem(PENDING_CREATE_KEY, JSON.stringify({ name: name.trim(), industry, locality }));
+      } catch {}
+      router.push(`/pjazza/agent?redirect=${encodeURIComponent('/pjazza/business/onboard?create=1')}`);
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch('/api/businesses', {
@@ -218,27 +266,51 @@ function AddNewBusiness() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), industry, locality }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: { error?: string; message?: string } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        setError(text ? `${text.slice(0, 200)}` : `Error ${res.status}. Try again.`);
+        return;
+      }
       if (res.status === 401) {
-        router.push(`/pjazza/agent?redirect=${encodeURIComponent('/pjazza/business/onboard')}`);
+        router.push(`/pjazza/agent?redirect=${encodeURIComponent('/pjazza/business/onboard?create=1')}`);
         return;
       }
       if (!res.ok) {
-        setError(data?.error || 'Failed to create business');
+        const err = data?.error || (data?.message ? String(data.message) : `Error ${res.status}`);
+        setError(err);
         return;
       }
       router.push('/pjazza/business/settings?new=1');
       router.refresh();
-    } catch {
-      setError('Failed to create business');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Network error. Try again.';
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const isLoggedIn = !!user;
+  const showWelcome = isLoggedIn;
+
   return (
     <div className="pj-section" style={{ paddingTop: 32, paddingBottom: 32 }}>
       <ScrollReveal>
+        {authLoading ? null : (
+          <div style={{ padding: 16, background: showWelcome ? 'var(--pj-green-soft, rgba(34,197,94,0.12))' : 'var(--pj-gold-soft, rgba(212,165,116,0.12))', borderRadius: 12, marginBottom: 24, border: `1px solid ${showWelcome ? 'var(--pj-green-border)' : 'var(--pj-gold-border)'}` }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--pj-text)', marginBottom: 4 }}>
+              {showWelcome ? 'You\'re signed in' : 'Enter your details first'}
+            </p>
+            <p style={{ fontSize: 13, color: 'var(--pj-text-secondary)', lineHeight: 1.5 }}>
+              {showWelcome
+                ? 'Enter your business name below and click Create business. Then add details, products, and go live.'
+                : 'Fill in the form below. When you click Create business, we\'ll ask you to sign in (Google, Apple, or email) to finish.'}
+            </p>
+          </div>
+        )}
         <span className="pj-label" style={{ display: 'block', marginBottom: 8 }}>NEW BUSINESS</span>
         <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', marginBottom: 8, letterSpacing: '-0.01em' }}>
           List your business as new
@@ -607,7 +679,9 @@ export default function BusinessOnboard() {
       <Suspense fallback={null}>
         <FindYourBusiness />
       </Suspense>
-      <AddNewBusiness />
+      <Suspense fallback={null}>
+        <AddNewBusiness />
+      </Suspense>
       <div className="pj-divider" />
       <PitchHero />
       <div className="pj-divider" />
