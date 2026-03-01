@@ -434,45 +434,59 @@ export default function BusinessDashboard() {
   const [avgResponse, setAvgResponse] = useState<number | null | undefined>();
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        setLoaded(true);
-        return;
-      }
-      supabase
-        .from('businesses')
-        .select('id, name, locality, stripe_account_id, subscription, streaming_streak')
-        .eq('owner_id', user.id)
-        .then(({ data }) => {
-          setBusinesses(data ?? []);
-          const first = (data ?? [])[0];
-          if (first) {
-            setBusinessName(first.name);
-            setBusinessLocality(first.locality ?? '');
-            fetch(`/api/bookings?business_id=${first.id}`)
-              .then((r) => r.json())
-              .then((b: Booking[]) => {
-                setBookings(b ?? []);
-                const now = new Date();
-                const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                const thisMonth = (b ?? []).filter(
-                  (x: Booking) => x.status === 'completed' && (x.created_at || '').startsWith(monthStr)
-                );
-                setRevenueMonth(thisMonth.reduce((s, x) => s + Number(x.amount), 0));
-              })
-              .catch(() => {});
-            fetch(`/api/businesses/${first.id}/stats`)
-              .then((r) => r.json())
-              .then((d) => {
-                setStreak(d.streaming_streak ?? 0);
-                setAvgResponse(d.avg_response_minutes ?? null);
-              })
-              .catch(() => {});
+    let cancelled = false;
+    try {
+      const supabase = createClient();
+      supabase.auth.getUser()
+        .then(({ data: { user } }) => {
+          if (cancelled) return;
+          if (!user) {
+            setLoaded(true);
+            return;
           }
-          setLoaded(true);
+          return supabase
+            .from('businesses')
+            .select('id, name, locality, stripe_account_id, subscription, streaming_streak')
+            .eq('owner_id', user.id)
+            .then(({ data }) => {
+              if (cancelled) return;
+              setBusinesses(data ?? []);
+              const first = (data ?? [])[0];
+              if (first) {
+                setBusinessName(first.name);
+                setBusinessLocality(first.locality ?? '');
+                fetch(`/api/bookings?business_id=${first.id}`)
+                  .then((r) => r.json())
+                  .then((b: Booking[]) => {
+                    if (cancelled) return;
+                    setBookings(b ?? []);
+                    const now = new Date();
+                    const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    const thisMonth = (b ?? []).filter(
+                      (x: Booking) => x.status === 'completed' && (x.created_at || '').startsWith(monthStr)
+                    );
+                    setRevenueMonth(thisMonth.reduce((s, x) => s + Number(x.amount), 0));
+                  })
+                  .catch(() => {});
+                fetch(`/api/businesses/${first.id}/stats`)
+                  .then((r) => r.json())
+                  .then((d) => {
+                    if (cancelled) return;
+                    setStreak(d.streaming_streak ?? 0);
+                    setAvgResponse(d.avg_response_minutes ?? null);
+                  })
+                  .catch(() => {});
+              }
+              setLoaded(true);
+            });
+        })
+        .catch(() => {
+          if (!cancelled) setLoaded(true);
         });
-    });
+    } catch {
+      setLoaded(true);
+    }
+    return () => { cancelled = true; };
   }, []);
 
   return (
