@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  ArrowRight, Search, CheckCircle, MapPin, Star,
+  ArrowRight, Search, CheckCircle, MapPin, Star, Plus, Loader2,
   Utensils, Home, Ship, Car, Heart, Wrench,
   Zap, DollarSign, Target, Eye, Shield, Clock,
   Users, ShoppingBag, Smartphone, GraduationCap,
@@ -180,6 +180,115 @@ function FindYourBusiness() {
             ))}
           </div>
         )}
+      </ScrollReveal>
+    </div>
+  );
+}
+
+const VALID_INDUSTRIES = [
+  { id: 'food', label: 'Food & Dining' },
+  { id: 'property', label: 'Property' },
+  { id: 'cars', label: 'Cars & Auto' },
+  { id: 'yachts', label: 'Yachts' },
+  { id: 'home-services', label: 'Home Services' },
+  { id: 'wellness', label: 'Wellness' },
+  { id: 'fashion', label: 'Fashion & Retail' },
+  { id: 'electronics', label: 'Electronics' },
+  { id: 'tourism', label: 'Tourism' },
+  { id: 'education', label: 'Education' },
+  { id: 'pets', label: 'Pets & Animals' },
+  { id: 'beauty', label: 'Beauty' },
+];
+
+function AddNewBusiness() {
+  const router = useRouter();
+  const [name, setName] = useState('');
+  const [industry, setIndustry] = useState('food');
+  const [locality, setLocality] = useState('Malta');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/businesses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), industry, locality }),
+      });
+      const data = await res.json();
+      if (res.status === 401) {
+        router.push(`/pjazza/agent?redirect=${encodeURIComponent('/pjazza/business/onboard')}`);
+        return;
+      }
+      if (!res.ok) {
+        setError(data?.error || 'Failed to create business');
+        return;
+      }
+      router.push('/pjazza/business/dashboard');
+      router.refresh();
+    } catch {
+      setError('Failed to create business');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="pj-section" style={{ paddingTop: 32, paddingBottom: 32 }}>
+      <ScrollReveal>
+        <span className="pj-label" style={{ display: 'block', marginBottom: 8 }}>NEW BUSINESS</span>
+        <h2 style={{ fontSize: 'var(--pj-size-h2)', fontWeight: 700, color: 'var(--pj-text)', marginBottom: 8, letterSpacing: '-0.01em' }}>
+          List your business as new
+        </h2>
+        <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+          Can&apos;t find your business? Add it now. You&apos;ll be able to edit details later.
+        </p>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={{ display: 'block', fontSize: 'var(--pj-size-xs)', fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Business name *</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              minLength={2}
+              placeholder="e.g. Noni's Kitchen"
+              style={{ width: '100%', padding: 12, borderRadius: 'var(--pj-radius-md)', background: 'var(--pj-surface-1)', border: '1px solid var(--pj-border)', color: 'var(--pj-text)', fontSize: 15 }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 'var(--pj-size-xs)', fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Industry *</label>
+            <select
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
+              style={{ width: '100%', padding: 12, borderRadius: 'var(--pj-radius-md)', background: 'var(--pj-surface-1)', border: '1px solid var(--pj-border)', color: 'var(--pj-text)', fontSize: 15 }}
+            >
+              {VALID_INDUSTRIES.map((i) => (
+                <option key={i.id} value={i.id}>{i.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 'var(--pj-size-xs)', fontWeight: 600, color: 'var(--pj-text-secondary)', marginBottom: 6 }}>Location</label>
+            <input
+              type="text"
+              value={locality}
+              onChange={(e) => setLocality(e.target.value)}
+              placeholder="e.g. Sliema"
+              style={{ width: '100%', padding: 12, borderRadius: 'var(--pj-radius-md)', background: 'var(--pj-surface-1)', border: '1px solid var(--pj-border)', color: 'var(--pj-text)', fontSize: 15 }}
+            />
+          </div>
+          {error && (
+            <p style={{ fontSize: 'var(--pj-size-small)', color: 'var(--pj-red)', padding: 10, background: 'var(--pj-red-soft)', borderRadius: 8 }}>{error}</p>
+          )}
+          <button type="submit" className="pj-btn-primary" style={{ padding: 16 }} disabled={submitting || name.trim().length < 2} data-testid="button-create-business">
+            {submitting ? <Loader2 size={18} className="animate-spin" style={{ marginRight: 8 }} /> : <Plus size={18} style={{ marginRight: 8 }} />}
+            {submitting ? 'Creating…' : 'Create business'}
+          </button>
+        </form>
       </ScrollReveal>
     </div>
   );
@@ -498,6 +607,7 @@ export default function BusinessOnboard() {
       <Suspense fallback={null}>
         <FindYourBusiness />
       </Suspense>
+      <AddNewBusiness />
       <div className="pj-divider" />
       <PitchHero />
       <div className="pj-divider" />

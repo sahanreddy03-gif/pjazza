@@ -44,6 +44,51 @@ function streamToForList(
   };
 }
 
+export async function POST(req: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const body = await req.json();
+    const businessId = body?.business_id;
+    if (!businessId) return NextResponse.json({ error: "business_id required" }, { status: 400 });
+
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("id, owner_id")
+      .eq("id", businessId)
+      .eq("owner_id", user.id)
+      .maybeSingle();
+    if (!biz) return NextResponse.json({ error: "Business not found" }, { status: 404 });
+
+    const roomId = `store-${businessId}`;
+    const { data: stream, error } = await supabase
+      .from("streams")
+      .insert({
+        business_id: businessId,
+        room_id: roomId,
+        title: "Live",
+        is_live: true,
+        peak_viewers: 0,
+      })
+      .select("id")
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    await supabase
+      .from("businesses")
+      .update({ is_live: true, updated_at: new Date().toISOString() })
+      .eq("id", businessId);
+
+    return NextResponse.json({ id: stream.id, room_id: roomId });
+  } catch (e) {
+    console.error("[POST /api/streams]", e);
+    return NextResponse.json({ error: "Failed to start stream" }, { status: 500 });
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient();

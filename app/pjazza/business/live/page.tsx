@@ -14,6 +14,7 @@ export default function BusinessLivePage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedStore, setSelectedStore] = useState('');
   const [token, setToken] = useState<string | null>(null);
+  const [streamId, setStreamId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,6 +25,13 @@ export default function BusinessLivePage() {
       .catch(() => setBusinesses([]));
   }, []);
 
+  const endStream = async () => {
+    if (streamId) {
+      try { await fetch(`/api/streams/${streamId}`, { method: 'PATCH' }); } catch {}
+      setStreamId(null);
+    }
+  };
+
   const goLive = async () => {
     if (!selectedStore) {
       setError('Select a store first');
@@ -32,6 +40,14 @@ export default function BusinessLivePage() {
     setLoading(true);
     setError('');
     try {
+      const streamRes = await fetch('/api/streams', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ business_id: selectedStore }),
+      });
+      const streamData = await streamRes.json();
+      if (streamRes.ok && streamData?.id) setStreamId(streamData.id);
+
       const res = await fetch('/api/livekit/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,7 +74,7 @@ export default function BusinessLivePage() {
       <div style={{ position: 'fixed', inset: 0, background: 'var(--pj-black)', zIndex: 100, display: 'flex', flexDirection: 'column' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(rgba(0,0,0,0.6), transparent)', zIndex: 20 }}>
           <button
-            onClick={() => router.push('/pjazza/business/dashboard')}
+            onClick={() => { endStream(); router.push('/pjazza/business/dashboard'); }}
             style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
             <ArrowLeft size={18} />
@@ -72,7 +88,7 @@ export default function BusinessLivePage() {
           <LiveKitVideoCall
             token={token}
             serverUrl={serverUrl}
-            onDisconnected={() => { setToken(null); }}
+            onDisconnected={() => { endStream(); setToken(null); }}
           />
         </div>
       </div>

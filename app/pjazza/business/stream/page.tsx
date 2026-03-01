@@ -174,7 +174,7 @@ function UploadView({ onSaved }: { onSaved?: () => void }) {
   const [uploadError, setUploadError] = useState('');
 
   useEffect(() => {
-    fetch('/api/businesses')
+    fetch('/api/businesses?mine=1')
       .then((r) => r.json())
       .then((data: BusinessOption[]) => setBusinesses(data))
       .catch(() => setBusinesses([]));
