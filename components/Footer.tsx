@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { Shield, FileText, Mail, Phone, Smartphone } from 'lucide-react';
 import { SITE } from '@/src/lib/site';
@@ -144,13 +142,14 @@ export default function Footer() {
         <a href={`mailto:${SITE.contact.email}`} style={{ color: 'var(--pj-text-tertiary)', textDecoration: 'none' }}>{SITE.contact.email}</a>
       </p>
       <p style={{ fontSize: 'var(--pj-size-micro)', color: 'var(--pj-text-tertiary)', margin: '8px 0 0' }}>
+        Website by{' '}
         <a
           href="https://oarcdigital.com/"
           target="_blank"
           rel="noopener"
           style={{ color: 'inherit', textDecoration: 'none' }}
         >
-          Website by OARC Digital
+          OARC Digital
         </a>
       </p>
     </footer>
