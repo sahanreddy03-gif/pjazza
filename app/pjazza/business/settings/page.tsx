@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Link2, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { createClient } from '@/src/lib/supabase/client';
 
 type Business = { id: string; name: string; description: string | null; locality: string | null; address_full: string | null; phone: string | null; email: string | null; website_url: string | null; cover_image_url?: string | null; price_tier?: string | null; dietary_tags?: string[]; wheelchair_accessible?: boolean };

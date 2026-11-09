@@ -3,6 +3,7 @@ import "./globals.css";
 import { SITE } from "@/src/lib/site";
 import { PostHogProvider } from "@/src/components/providers/PostHogProvider";
 import { PWAInstallPrompt } from "@/src/components/PWAInstallPrompt";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -126,7 +127,10 @@ export default function RootLayout({
       <body className="min-h-screen bg-surface text-ink antialiased font-sans">
         <PostHogProvider>
           <JsonLd />
-          <div className="min-h-screen w-full">{children}</div>
+          <div className="min-h-screen w-full" style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>{children}</div>
+            <Footer />
+          </div>
           <PWAInstallPrompt />
         </PostHogProvider>
       </body>
